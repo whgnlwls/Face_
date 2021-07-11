@@ -1,8 +1,13 @@
-void buzFunc() {
-	for(int i = 0; i < 10; i++) {
-		for(int w = 0; w < 100; w++) {
-			setBuzzer();
+void BZsetBuzzer(int buzzer) {
+	//NoT = Number of Times
+	for(int NoT = 0; NoT < 10; NoT++) {
+		for(int frequency = 0; frequency < 100; frequency++) {
+		digitalWrite(buzzer, LOW);
+		delay(2);
+		digitalWrite(buzzer, HIGH);
+		delay(2);
 		}
+		//Blank
 		delay(100);
 	}
 }
