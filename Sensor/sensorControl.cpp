@@ -1,3 +1,4 @@
+//include main method if(wiringPiSetup() == -1) return -1;
 //Buzzer
 void BZsetBuzzer(int buzzer) {
 	//NoT = Number of Times
@@ -51,10 +52,4 @@ void MTsetClose() {
 	softPwmCreate(MOT, 0, 200);
 	
 	softPwmWrite(MOT,24);
-}
-
-int main() {
-  if(wiringPiSetup() == -1) return -1;
-  
-  return 0;
 }
