@@ -10,5 +10,5 @@ void BZsetBuzzer(int buzzer);
 float USgetDist(int ultraSonicTrig, int ultraSonicEcho);
 
 //Motor
-void MTsetOpen();
-void MTsetClose();
+void MTsetOpen(int motor);
+void MTsetClose(int motor);
