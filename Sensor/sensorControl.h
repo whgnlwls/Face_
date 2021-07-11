@@ -1,3 +1,4 @@
+//Buzzer
 void BZsetBuzzer(int buzzer) {
 	//NoT = Number of Times
 	for(int NoT = 0; NoT < 10; NoT++) {
@@ -11,7 +12,7 @@ void BZsetBuzzer(int buzzer) {
 		delay(100);
 	}
 }
-
+//UltraSonic
 float USgetDist(int ultraSonicTrig, int ultraSonicEcho) {
 	float distance;
 	int throw_time, catch_time;
@@ -39,4 +40,15 @@ float USgetDist(int ultraSonicTrig, int ultraSonicEcho) {
   printf("distance %.2fcm\n", distance);
   
   return distance;
+}
+//Motor
+void MTsetOpen() {
+	softPwmCreate(MOT, 0, 200);
+
+	softPwmWrite(MOT,5);
+}
+void MTsetClose() {
+	softPwmCreate(MOT, 0, 200);
+	
+	softPwmWrite(MOT,24);
 }
