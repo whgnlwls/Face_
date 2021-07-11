@@ -1,9 +1,9 @@
 //Buzzer
-void BZsetBuzzer(int buzzer);
+extern void BZsetBuzzer(int buzzer);
 
 //UltraSonic
-float USgetDist(int ultraSonicTrig, int ultraSonicEcho);
+extern float USgetDist(int ultraSonicTrig, int ultraSonicEcho);
 
 //Motor
-void MTsetOpen(int motor);
-void MTsetClose(int motor);
+extern void MTsetOpen(int motor);
+extern void MTsetClose(int motor);
