@@ -1,4 +1,5 @@
 //include main method if(wiringPiSetup() == -1) return -1;
+
 //Buzzer
 void BZsetBuzzer(int buzzer) {
 	//NoT = Number of Times
@@ -43,13 +44,13 @@ float USgetDist(int ultraSonicTrig, int ultraSonicEcho) {
   return distance;
 }
 //Motor
-void MTsetOpen() {
-	softPwmCreate(MOT, 0, 200);
+void MTsetOpen(int motor) {
+	softPwmCreate(motor, 0, 200);
 
-	softPwmWrite(MOT,5);
+	softPwmWrite(motor,5);
 }
-void MTsetClose() {
-	softPwmCreate(MOT, 0, 200);
+void MTsetClose(int motor) {
+	softPwmCreate(motor, 0, 200);
 	
-	softPwmWrite(MOT,24);
+	softPwmWrite(motor,24);
 }
