@@ -1,3 +1,12 @@
+void buzFunc() {
+	for(int i = 0; i < 10; i++) {
+		for(int w = 0; w < 100; w++) {
+			setBuzzer();
+		}
+		delay(100);
+	}
+}
+
 float USgetDist(int ultraSonicTrig, int ultraSonicEcho) {
 	float distance;
 	int throw_time, catch_time;
