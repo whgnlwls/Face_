@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <wiringPi.h>
-#include <softPwm.h>
-
 //Buzzer
 void BZsetBuzzer(int buzzer) {
 	//NoT = Number of Times
