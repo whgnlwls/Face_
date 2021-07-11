@@ -1,4 +1,5 @@
 //include main method if(wiringPiSetup() == -1) return -1;
+#include <sensorControl.h>
 
 //Buzzer
 void BZsetBuzzer(int buzzer) {
