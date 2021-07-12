@@ -28,14 +28,14 @@ class DoorLock {
   }
   
   //Buzzer
-  void BZsetBuzzer(int buzzer);
+  void BZsetBuzzer();
   
   //UltraSonic
-  void USgetDist(int ultraSonicTrig, int ultraSonicEcho);
+  void USgetDist();
   
   //Motor
-  void MTsetOpen(int motor);
-  void MTsetClose(int motor);
+  void MTsetOpen();
+  void MTsetClose();
 }
 
 #endif
