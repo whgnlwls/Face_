@@ -10,9 +10,8 @@ class DoorLock {
   int pinUltraSonicEcho;
   int pinMotor;
   
-  float Dist;
-  
   protected:
+  float Dist;
   
   public:
   //initialize
