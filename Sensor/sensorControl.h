@@ -17,11 +17,17 @@ class DoorLock {
   //initialize
   DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor);
   
+  //get
+  getDist();
+  
+  //set
+  setDist(float Dist);
+  
   //Buzzer
   void BZsetBuzzer(int buzzer);
   
   //UltraSonic
-  float USgetDist(int ultraSonicTrig, int ultraSonicEcho) {return Dist};
+  void USgetDist(int ultraSonicTrig, int ultraSonicEcho);
   
   //Motor
   void MTsetOpen(int motor);
