@@ -42,7 +42,7 @@ void DoorLock::BZsetBuzzer() {
 }
 
 //UltraSonic
-float DoorLock::USgetDist() {
+void DoorLock::USgetDist() {
 	float distance;
 	int throw_time, catch_time;
 	
