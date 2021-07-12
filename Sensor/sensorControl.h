@@ -16,7 +16,7 @@ class DoorLock {
   
   public:
   //initialize
-  DoorLock(int pinBuzzer, int pinUltraSonicTrig, pinUltraSonicEcho, pinMotor);
+  DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor);
   
   //Buzzer
   void BZsetBuzzer(int buzzer);
