@@ -16,15 +16,6 @@ DoorLock::DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, 
 	pinMode(this.pinUltraSonicEcho, INPUT);
 	pinMode(this.pinMotor, OUTPUT);
 }
-//get
-void DoorLock::getDist() {
-	return Dist;
-}
-
-//set
-void DoorLock::setDist(float Dist) {
-	this.Dist = Dist;
-}
 
 //Buzzer
 void DoorLock::BZsetBuzzer() {
