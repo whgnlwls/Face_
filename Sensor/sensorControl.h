@@ -18,10 +18,14 @@ class DoorLock {
   DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor);
   
   //get
-  float getDist();
+  float getDist() {
+    return Dist;
+  }
   
   //set
-  void setDist(float Dist);
+  void setDist(float Dist) {
+    this.Dist = Dist;
+  }
   
   //Buzzer
   void BZsetBuzzer(int buzzer);
