@@ -1,6 +1,5 @@
 //include main method if(wiringPiSetup() == -1) return -1;
 #include <stdio.h>
-#include <unistd.h>
 #include <wiringPi.h>
 #include <softPwm.h>
 #include <sensorControl.h>
