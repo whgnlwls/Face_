@@ -4,57 +4,78 @@
 #include <softPwm.h>
 #include <sensorControl.h>
 
+//initialize
+DoorLock::DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor) {
+	this.pinBuzzer = pinBuzzer;
+	this.pinUltraSonicTrig = pinUltraSonicTrig;
+	this.pinUltraSonicEcho = pinUltraSonicEcho;
+	this.pinMotor = pinMotor;
+	
+	pinMode(this.pinBuzzer, OUTPUT);
+	pinMode(this.pinUltraSonicTrig, OUTPUT);
+	pinMode(this.pinUltraSonicEcho, INPUT);
+	pinMode(this.pinMotor, OUTPUT);
+}
+//get
+void DoorLock::getDist() {
+	return Dist;
+}
+
+//set
+void DoorLock::setDist(float Dist) {
+	this.Dist = Dist;
+}
+
 //Buzzer
-void BZsetBuzzer(int buzzer) {
+void DoorLock::BZsetBuzzer() {
 	//NoT = Number of Times
 	for(int NoT = 0; NoT < 10; NoT++) {
 		for(int frequency = 0; frequency < 100; frequency++) {
-		digitalWrite(buzzer, LOW);
-		delay(2);
-		digitalWrite(buzzer, HIGH);
-		delay(2);
+			digitalWrite(pinBuzzer, LOW);
+			delayMicroseconds(100);
+			digitalWrite(pinBuzzer, HIGH);
+			delayMicroseconds(100);
 		}
 		//Blank
 		delay(100);
 	}
 }
+
 //UltraSonic
-float USgetDist(int ultraSonicTrig, int ultraSonicEcho) {
+float DoorLock::USgetDist() {
 	float distance;
 	int throw_time, catch_time;
 	
 	for(int i = 0; i < 5; i++) {
-    digitalWrite(ultraSonicTrig, LOW);
-    delay(200);
+   	 	digitalWrite(pinUltraSonicTrig, LOW);
+ 	   	delay(200);
     
-    //throw
-    digitalWrite(ultraSonicTrig, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(ultraSonicTrig, LOW);
+  	  	//throw
+ 	   	digitalWrite(pinUltraSonicTrig, HIGH);
+ 	   	delayMicroseconds(10);
+ 	   	digitalWrite(pinUltraSonicTrig, LOW);
     
-    //wait
-    while (digitalRead(ultraSonicEcho) == 0);
+ 	   	//wait
+ 	   	while (digitalRead(pinUltraSonicEcho) == 0);
     
-    //if catch signal
-    throw_time = micros();
-    while (digitalRead(ultraSonicEcho) == 1);
-    catch_time = micros();
-    
-    distance += (catch_time - throw_time) / 29. / 2.;
-  }
-  distance = distance / 5;
-  printf("distance %.2fcm\n", distance);
-  
-  return distance;
+  	  	//if catch signal
+		throw_time = micros();
+		while (digitalRead(pinUltraSonicEcho) == 1);
+		catch_time = micros();
+		distance += (catch_time - throw_time) / 29. / 2.;
+  	}
+	setDist(distance / 5.);
+  	printf("distance %.2fcm\n", getDist());
 }
-//Motor
-void MTsetOpen(int motor) {
-	softPwmCreate(motor, 0, 200);
 
-	softPwmWrite(motor,5);
+//Motor
+void DoorLock::MTsetOpen() {
+	softPwmCreate(pinMotor, 0, 200);
+
+	softPwmWrite(pinMotor,5);
 }
-void MTsetClose(int motor) {
-	softPwmCreate(motor, 0, 200);
+void DoorLock::MTsetClose() {
+	softPwmCreate(pinMotor, 0, 200);
 	
-	softPwmWrite(motor,24);
+	softPwmWrite(pinMotor,24);
 }
