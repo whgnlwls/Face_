@@ -36,6 +36,6 @@ class DoorLock {
   //Motor
   void MTsetOpen();
   void MTsetClose();
-}
+};
 
 #endif
