@@ -14,6 +14,8 @@ DoorLock::DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, 
 	pinMode(DoorLock::pinUltraSonicTrig, OUTPUT);
 	pinMode(DoorLock::pinUltraSonicEcho, INPUT);
 	pinMode(DoorLock::pinMotor, OUTPUT);
+  
+  printf("pinNum : buz %d, ulst %d, ulse %d, mot %d\n", pinBuzzer, pinUltraSonicTrig, pinUltraSonicEcho, pinMotor);
 }
 
 //Buzzer
@@ -22,9 +24,9 @@ void DoorLock::BZsetBuzzer() {
 	for (int NoT = 0; NoT < 10; NoT++) {
 		for (int frequency = 0; frequency < 100; frequency++) {
 			digitalWrite(pinBuzzer, LOW);
-			delayMicroseconds(100);
+			delayMicroseconds(1000);
 			digitalWrite(pinBuzzer, HIGH);
-			delayMicroseconds(100);
+			delayMicroseconds(1000);
 		}
 		//Blank
 		delay(100);
@@ -33,7 +35,7 @@ void DoorLock::BZsetBuzzer() {
 
 //UltraSonic
 void DoorLock::USgetDist() {
-	float distance;
+	float distance = 0;
 	int throw_time, catch_time;
 
 	for (int i = 0; i < 5; i++) {
@@ -61,11 +63,13 @@ void DoorLock::USgetDist() {
 //Motor
 void DoorLock::MTsetOpen() {
 	softPwmCreate(pinMotor, 0, 200);
-
+  
 	softPwmWrite(pinMotor, 5);
+  delay(1000);
 }
 void DoorLock::MTsetClose() {
-	softPwmCreate(pinMotor, 0, 200);
-
-	softPwmWrite(pinMotor, 24);
+  softPwmCreate(pinMotor, 0, 200);
+  
+  softPwmWrite(pinMotor, 24);
+  delay(1000);
 }
