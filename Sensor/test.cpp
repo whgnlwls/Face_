@@ -14,9 +14,13 @@ int main() {
 	DoorLock doorlock = DoorLock(buz, ulst, ulse, mot);
 
 	doorlock.BZsetBuzzer();
-	doorlock.USgetDist();
+	for(int i = 0; i < 5; i++) {
+		doorlock.USgetDist();
+	}
 	doorlock.MTsetOpen();
 	doorlock.MTsetClose();
+	
+	printf("Finish\n");
 
 	return 0;
 }
