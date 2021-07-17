@@ -15,6 +15,7 @@ protected:
 
 public:
 	//initialize
+	DoorLock() {};
 	DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor);
 
 	//get
