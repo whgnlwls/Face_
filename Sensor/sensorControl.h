@@ -1,4 +1,3 @@
-//header guard
 #ifndef SENSORCONTROL_H
 #define SENSORCONTROL_H
 
