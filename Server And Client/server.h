@@ -11,8 +11,6 @@
 
 void showError(const char* msg);
 
-DWORD WINAPI clientThread(LPVOID lParam);
-
 void createServer(int PORT);
 
 #endif
