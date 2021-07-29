@@ -53,7 +53,7 @@ DWORD WINAPI clientThread(LPVOID lParam) {
 	return 0;
 }
 
-void createServer(const char* IPAdress, int PORT) {
+void createServer(int PORT) {
 	//create server socket
 	int recval;
 	SOCKET serverSocket;
