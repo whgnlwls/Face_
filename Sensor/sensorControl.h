@@ -1,6 +1,8 @@
 #ifndef SENSORCONTROL_H
 #define SENSORCONTROL_H
 
+#include "DoorLockHead.h"
+
 //class
 class DoorLock {
 private:
