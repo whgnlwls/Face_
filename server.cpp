@@ -1,16 +1,10 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <stdio.h>
-#include <iostream>
-#include <WinSock2.h>
-#pragma comment (lib , "ws2_32.lib")
-#include <Windows.h>
 #include "server.h"
 
 #define BUFSIZE 512
 
 void showError(const char* msg)
 {
-	std::cout << msg << std::endl;
+	cout << msg << endl;
 }
 
 DWORD WINAPI clientThread(LPVOID lParam) {
@@ -34,21 +28,44 @@ DWORD WINAPI clientThread(LPVOID lParam) {
 		else if (ret == 0) break;
 
 		msgbuf[ret] = '\0';
-		std::cout << "[CLIENT] [IP : %s, PORT : %d] : %s"
-			<< inet_ntoa(clientAddr.sin_addr) << ntohs(clientAddr.sin_port) << msgbuf << std::endl;
+		cout << "[CLIENT] [IP : %s, PORT : %d] : %s"
+			<< inet_ntoa(clientAddr.sin_addr) << ntohs(clientAddr.sin_port) << msgbuf << endl;
 
-		//server send message
-		ret = send(clientSocket, msgbuf, ret, 0);
-		if (ret == SOCKET_ERROR) {
-			showError("server sending error");
-			break;
+		//create token
+		vector<string> tokenVector;
+		stringstream msgStream(msgbuf);
+		string tokenizer;
+
+		while (getline(msgStream, tokenizer, '$')) {
+			tokenVector.push_back(tokenizer);
+		}
+
+		//token works
+		if (tokenVector[0] == "login") {
+			//admin?
+			if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
+				//server send message
+				ret = send(clientSocket, "adminstrator", ret, 0);
+				if (ret == SOCKET_ERROR) {
+					showError("server sending error");
+					break;
+				}
+			}
+			//or?
+			//coding anything
+		}
+		else if (tokenVector[0] == "open") {
+
+		}
+		else if (tokenVector[0] == "close") {
+
 		}
 	}
 	//close client socket
 	closesocket(clientSocket);
 
-	std::cout << "[SERVER] Client[IP : %s, PORT : %d] has exit"
-		<< inet_ntoa(clientAddr.sin_addr) << ntohs(clientAddr.sin_port) << std::endl;
+	cout << "[SERVER] Client[IP : %s, PORT : %d] has exit"
+		<< inet_ntoa(clientAddr.sin_addr) << ntohs(clientAddr.sin_port) << endl;
 
 	return 0;
 }
@@ -93,8 +110,8 @@ void createServer(int PORT) {
 			showError("server accepting error");
 			continue;
 		}
-		std::cout << "[SERVER] Accept client[IP : %s, PORT : %d]" 
-			<< inet_ntoa(clientAddr.sin_addr) << ntohs(clientAddr.sin_port) << std::endl;
+		cout << "[SERVER] Accept client[IP : %s, PORT : %d]" 
+			<< inet_ntoa(clientAddr.sin_addr) << ntohs(clientAddr.sin_port) << endl;
 
 		//create client thread
 		hthread = CreateThread(NULL, 0, clientThread, (LPVOID)clientSocket, 0, NULL);
