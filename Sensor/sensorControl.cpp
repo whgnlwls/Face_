@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <wiringPi.h>
-#include <softPwm.h>
 #include "sensorControl.h"
 
 //initialize
@@ -14,8 +11,8 @@ DoorLock::DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, 
 	pinMode(DoorLock::pinUltraSonicTrig, OUTPUT);
 	pinMode(DoorLock::pinUltraSonicEcho, INPUT);
 	pinMode(DoorLock::pinMotor, OUTPUT);
-  
-  printf("pinNum : buz %d, ulst %d, ulse %d, mot %d\n", pinBuzzer, pinUltraSonicTrig, pinUltraSonicEcho, pinMotor);
+
+	printf("pinNum : buz %d, ulst %d, ulse %d, mot %d\n", pinBuzzer, pinUltraSonicTrig, pinUltraSonicEcho, pinMotor);
 }
 
 //Buzzer
@@ -63,13 +60,13 @@ void DoorLock::USgetDist() {
 //Motor
 void DoorLock::MTsetOpen() {
 	softPwmCreate(pinMotor, 0, 200);
-  
+
 	softPwmWrite(pinMotor, 5);
-  delay(1000);
+	delay(1000);
 }
 void DoorLock::MTsetClose() {
-  softPwmCreate(pinMotor, 0, 200);
-  
-  softPwmWrite(pinMotor, 24);
-  delay(1000);
+	softPwmCreate(pinMotor, 0, 200);
+
+	softPwmWrite(pinMotor, 24);
+	delay(1000);
 }
