@@ -9,6 +9,9 @@ Server::Server(int PORT) {
 		Server::showError("create server socket error");
 		exit(-1);
 	}
+	Server::serverAddr.sin_family = AF_INET;
+	Server::serverAddr.sin_port = PORT;
+	Server::serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 }
 
 //close socket
@@ -18,17 +21,23 @@ Server::~Server() {
 
 //bind
 void Server::bindSocket() {
-	
+	if(bind(Server::serverSocket, (struct sockaddr*)&Server::serverAddr, sizeof(Server::serverAddr)) < 0) {
+		Server::showError("bind server socket error");
+		exit(-1);
+	}
 }
 
 //listen
 void Server::listenSocket() {
-	
+	listen(Server::serverSocket, 3);
 }
 
 //accept
 void Server::acceptSocket() {
-	
+	Server::clientSocket = accept(Server::serverSocket, (struct sockaddr*)&Server::clientAddr, (socklen_t*)sizeof(Server::clientAddr));
+	if(Server::clientSocket < 0) {
+		Server::showError("accept client error");
+	}
 }
 
 //print error
