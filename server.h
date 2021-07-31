@@ -36,10 +36,11 @@ protected:
 	//accept
 	void acceptSocket();
 	
-	//printError
+	//print error
 	void showError(const char* msg);
 	
 public:
+	//create server
 	void createServer(int PORT);
 };
 
