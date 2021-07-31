@@ -1,12 +1,18 @@
 #ifndef DOORLOCKHEAD_H
 #define DOORLOCKHEAD_H
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <stdio.h>
-#include <wiringPi.h>
-#include <softPwm.h>
 #include <stdio.h>
 #include <iostream>
+
+//sensorControl
+#include <wiringPi.h>
+#include <softPwm.h>
+
+//server
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 using namespace std;
 
