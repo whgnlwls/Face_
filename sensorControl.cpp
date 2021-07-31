@@ -1,22 +1,22 @@
 #include "sensorControl.h"
 
 //initialize
-DoorLock::DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor) {
-	DoorLock::pinBuzzer = pinBuzzer;
-	DoorLock::pinUltraSonicTrig = pinUltraSonicTrig;
-	DoorLock::pinUltraSonicEcho = pinUltraSonicEcho;
-	DoorLock::pinMotor = pinMotor;
+SensorControl::SensorControl(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor) {
+	SensorControl::pinBuzzer = pinBuzzer;
+	SensorControl::pinUltraSonicTrig = pinUltraSonicTrig;
+	SensorControl::pinUltraSonicEcho = pinUltraSonicEcho;
+	SensorControl::pinMotor = pinMotor;
 
-	pinMode(DoorLock::pinBuzzer, OUTPUT);
-	pinMode(DoorLock::pinUltraSonicTrig, OUTPUT);
-	pinMode(DoorLock::pinUltraSonicEcho, INPUT);
-	pinMode(DoorLock::pinMotor, OUTPUT);
+	pinMode(SensorControl::pinBuzzer, OUTPUT);
+	pinMode(SensorControl::pinUltraSonicTrig, OUTPUT);
+	pinMode(SensorControl::pinUltraSonicEcho, INPUT);
+	pinMode(SensorControl::pinMotor, OUTPUT);
 
 	printf("pinNum : buz %d, ulst %d, ulse %d, mot %d\n", pinBuzzer, pinUltraSonicTrig, pinUltraSonicEcho, pinMotor);
 }
 
 //Buzzer
-void DoorLock::BZsetBuzzer() {
+void SensorControl::BZsetBuzzer() {
 	//NoT = Number of Times
 	for (int NoT = 0; NoT < 10; NoT++) {
 		for (int frequency = 0; frequency < 100; frequency++) {
@@ -31,7 +31,7 @@ void DoorLock::BZsetBuzzer() {
 }
 
 //UltraSonic
-void DoorLock::USgetDist() {
+void SensorControl::USgetDist() {
 	float distance = 0;
 	int throw_time, catch_time;
 
@@ -58,13 +58,13 @@ void DoorLock::USgetDist() {
 }
 
 //Motor
-void DoorLock::MTsetOpen() {
+void SensorControl::MTsetOpen() {
 	softPwmCreate(pinMotor, 0, 200);
 
 	softPwmWrite(pinMotor, 5);
 	delay(1000);
 }
-void DoorLock::MTsetClose() {
+void SensorControl::MTsetClose() {
 	softPwmCreate(pinMotor, 0, 200);
 
 	softPwmWrite(pinMotor, 24);
