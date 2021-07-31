@@ -2,6 +2,11 @@
 #define SERVER_H
 
 #include "DoorLockHead.h"
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <pthread.h>
 
 #define BUFSIZE 512
 
