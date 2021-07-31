@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <wiringPi.h>
-#include <softPwm.h>
+//#include "server.h"
 #include "sensorControl.h"
 
 #define buz 21
@@ -11,14 +9,16 @@
 int main() {
 	if (wiringPiSetup() == -1) return -1;
 
-	DoorLock doorlock = DoorLock(buz, ulst, ulse, mot);
-
-	doorlock.BZsetBuzzer();
+	SensorControl sensorControl = SensorControl(buz, ulst, ulse, mot);
+	
+	sensorControl.BZsetBuzzer();
 	for(int i = 0; i < 5; i++) {
-		doorlock.USgetDist();
+		sensorControl.USgetDist();
 	}
-	doorlock.MTsetOpen();
-	doorlock.MTsetClose();
+	sensorControl.MTsetOpen();
+	sensorControl.MTsetClose();
+	
+	//createServer(9000);
 	
 	printf("Finish\n");
 
