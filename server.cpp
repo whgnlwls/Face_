@@ -3,7 +3,9 @@
 //client thread
 void* clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
-	recv(threadClientSocket, msgbuf, BUFSIZE, 0);
+	if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
+		showError("msg recive error");
+	}
 	cout << "[CLIENT] : " << msgbuf << endl;
 }
 
