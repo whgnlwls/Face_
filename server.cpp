@@ -7,7 +7,6 @@
 Server::Server(int PORT) {
 	if((Server::serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 		Server::showError("create server socket error");
-		exit(-1);
 	}
 	Server::serverAddr.sin_family = AF_INET;
 	Server::serverAddr.sin_port = PORT;
@@ -23,7 +22,6 @@ Server::~Server() {
 void Server::bindSocket() {
 	if(bind(Server::serverSocket, (struct sockaddr*)&Server::serverAddr, sizeof(Server::serverAddr)) < 0) {
 		Server::showError("bind server socket error");
-		exit(-1);
 	}
 }
 
@@ -43,4 +41,5 @@ void Server::acceptSocket() {
 //print error
 void Server::showError(const char* msg) {
 	cout << msg << endl;
+	exit(1);
 }
