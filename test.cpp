@@ -1,4 +1,4 @@
-//#include "server.h"
+#include "server.h"
 #include "sensorControl.h"
 
 #define buz 21
@@ -18,7 +18,10 @@ int main() {
 	sensorControl.MTsetOpen();
 	sensorControl.MTsetClose();
 	
-	//createServer(9000);
+	Server server = Server(9000);
+	server.bind();
+	server.listen();
+	server.accept();
 	
 	printf("Finish\n");
 
