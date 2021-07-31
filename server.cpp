@@ -1,7 +1,5 @@
 #include "server.h"
 
-#define BUFSIZE 512
-
 //initialize
 //create socket
 Server::Server(int PORT) {
