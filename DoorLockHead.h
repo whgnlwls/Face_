@@ -7,11 +7,6 @@
 #include <softPwm.h>
 #include <stdio.h>
 #include <iostream>
-#include <vector>
-#include <sstream>
-#include <WinSock2.h>
-#pragma comment (lib , "ws2_32.lib")
-#include <Windows.h>
 
 using namespace std;
 
