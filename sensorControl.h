@@ -4,7 +4,7 @@
 #include "DoorLockHead.h"
 
 //class
-class DoorLock {
+class SensorControl {
 private:
 	int pinBuzzer;
 	int pinUltraSonicTrig;
@@ -16,8 +16,8 @@ protected:
 
 public:
 	//initialize
-	DoorLock() {};
-	DoorLock(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor);
+	SensorControl() {};
+	SensorControl(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor);
 
 	//get
 	float getDist() {
@@ -26,7 +26,7 @@ public:
 
 	//set
 	void setDist(float Dist) {
-		DoorLock::Dist = Dist;
+		SensorControl::Dist = Dist;
 	}
 
 	//Buzzer
