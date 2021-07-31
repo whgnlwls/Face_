@@ -31,6 +31,9 @@ public:
 	
 	//accept
 	void acceptSocket();
+	
+	//printError
+	void showError(const char* msg);
 };
 
 #endif
