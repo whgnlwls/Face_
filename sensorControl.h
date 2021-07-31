@@ -2,6 +2,8 @@
 #define SENSORCONTROL_H
 
 #include "DoorLockHead.h"
+#include <wiringPi.h>
+#include <softPwm.h>
 
 //class
 class SensorControl {
