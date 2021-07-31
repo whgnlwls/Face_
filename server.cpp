@@ -1,5 +1,12 @@
 #include "server.h"
 
+//client thread
+void* clientThread(void* clientSock) {
+	int threadClientSocket = *(int*)clientSock;
+	recv(threadClientSocket, msgbuf, BUFSIZE, 0);
+	cout << "recv : " << msgbuf << endl;
+}
+
 //initialize
 //create socket
 Server::Server(int PORT) {
@@ -32,13 +39,15 @@ void Server::listenSocket() {
 
 //accept
 void Server::acceptSocket() {
-	Server::clientSocket = accept(Server::serverSocket, (struct sockaddr*)&Server::clientAddr, (socklen_t*)sizeof(Server::clientAddr));
-	if(Server::clientSocket < 0) {
-		Server::showError("accept client error");
-	}
-	
 	//create client thread
-	
+	pthread_t cthread;
+	while(true) {
+		Server::clientSocket = accept(Server::serverSocket, (struct sockaddr*)&Server::clientAddr, (socklen_t*)sizeof(Server::clientAddr));
+		if(Server::clientSocket < 0) {
+			Server::showError("accept client error");
+		}
+		pthread_create(&cthread, NULL, clientThread, (void*)&Server::clientSocket);
+	}
 }
 
 //print error
