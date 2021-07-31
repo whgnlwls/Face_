@@ -19,9 +19,9 @@ int main() {
 	sensorControl.MTsetClose();
 	
 	Server server = Server(9000);
-	server.bind();
-	server.listen();
-	server.accept();
+	server.bindSocket();
+	server.listenSocket();
+	server.acceptSocket();
 	
 	printf("Finish\n");
 
