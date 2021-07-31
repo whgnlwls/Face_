@@ -10,6 +10,9 @@
 
 #define BUFSIZE 512
 
+//thread
+void* clientThread(void* clientSock);
+
 //class
 class Server {
 private:
