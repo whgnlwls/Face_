@@ -46,3 +46,11 @@ void Server::showError(const char* msg) {
 	cout << msg << endl;
 	exit(1);
 }
+
+//create server
+void Server::createServer(int PORT) {
+	Server server = Server(PORT);
+	server.bindSocket();
+	server.listenSocket();
+	server.acceptSocket();
+}
