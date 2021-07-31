@@ -21,7 +21,6 @@ private:
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in clientAddr;
 	char msgbuf[BUFSIZE + 1];
-	int addrlen;
 
 protected:
 	//initialize
