@@ -9,7 +9,7 @@ Server::Server(int PORT) {
 		Server::showError("create server socket error");
 	}
 	Server::serverAddr.sin_family = AF_INET;
-	Server::serverAddr.sin_port = PORT;
+	Server::serverAddr.sin_port = htons(PORT);
 	Server::serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 }
 
@@ -27,7 +27,9 @@ void Server::bindSocket() {
 
 //listen
 void Server::listenSocket() {
-	listen(Server::serverSocket, 3);
+	if(listen(Server::serverSocket, 1) < 0) {
+		showError("server listen error");
+	}
 }
 
 //accept
@@ -36,6 +38,9 @@ void Server::acceptSocket() {
 	if(Server::clientSocket < 0) {
 		Server::showError("accept client error");
 	}
+	
+	//create client thread
+	
 }
 
 //print error
