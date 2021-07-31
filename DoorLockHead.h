@@ -7,10 +7,6 @@
 
 using namespace std;
 
-//sensorControl
-#include <wiringPi.h>
-#include <softPwm.h>
-
 //server
 #include <unistd.h>
 #include <netinet/in.h>
