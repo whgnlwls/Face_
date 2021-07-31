@@ -18,8 +18,10 @@ class Server {
 private:
 	int serverSocket;
 	int clientSocket;
+	
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in clientAddr;
+	
 	char msgbuf[BUFSIZE + 1];
 
 protected:
@@ -38,10 +40,10 @@ protected:
 	//accept
 	void acceptSocket();
 	
+public:
 	//print error
 	void showError(const char* msg);
 	
-public:
 	//create server
 	void createServer(int PORT);
 };
