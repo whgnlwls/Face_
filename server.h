@@ -26,6 +26,7 @@ public:
 	//initialize
 	Server() {};
 	Server(int PORT);
+	
 	~Server();
 	
 	//bind
