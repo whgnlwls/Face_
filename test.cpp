@@ -18,10 +18,8 @@ int main() {
 	sensorControl.MTsetOpen();
 	sensorControl.MTsetClose();
 	
-	Server server = Server(9000);
-	server.bindSocket();
-	server.listenSocket();
-	server.acceptSocket();
+	Server server;
+	server.createServer(9000);
 	
 	printf("Finish\n");
 
