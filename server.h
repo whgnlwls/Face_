@@ -1,7 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "DoorLockHead.h"
+#include "sensorControl.h"
 
 #define BUFSIZE 512
 
