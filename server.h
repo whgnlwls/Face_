@@ -14,7 +14,7 @@
 void* clientThread(void* clientSock);
 
 //class
-class Server {
+class Server extends sensorControl {
 private:
 	int serverSocket;
 	int clientSocket;
