@@ -8,15 +8,17 @@
 
 int main() {
 	if (wiringPiSetup() == -1) return -1;
-
-	SensorControl sensorControl = SensorControl(buz, ulst, ulse, mot);
 	
-	sensorControl.BZsetBuzzer();
+	Server server;
+	
+	server.SensorControl(buz, ulst, ulse, mot);
+	
+	server.BZsetBuzzer();
 	for(int i = 0; i < 5; i++) {
-		sensorControl.USgetDist();
+		server.USgetDist();
 	}
-	sensorControl.MTsetOpen();
-	sensorControl.MTsetClose();
+	server.MTsetOpen();
+	server.MTsetClose();
 	
 	Server server;
 	server.createServer(9000);
