@@ -5,9 +5,6 @@
 
 #define BUFSIZE 512
 
-//thread
-void* clientThread(void* clientSock);
-
 //class
 class Server extends SensorControl {
 private:
@@ -34,6 +31,9 @@ protected:
 	
 	//accept
 	void acceptSocket();
+	
+	//thread
+	void* clientThread(void* clientSock);
 	
 public:
 	//print error
