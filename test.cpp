@@ -1,5 +1,4 @@
 #include "server.h"
-#include "sensorControl.h"
 
 #define buz 21
 #define ulst 28
