@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <iostream>
 
+//sensor control
+#include <wiringPi.h>
+#include <softPwm.h>
+
+//server
+
 using namespace std;
 
 #endif
