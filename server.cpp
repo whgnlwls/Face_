@@ -7,6 +7,9 @@ void* clientThread(void* clientSock) {
 		showError("msg recive error");
 	}
 	cout << "[CLIENT] : " << msgbuf << endl;
+	
+	//create token
+	
 }
 
 //initialize
