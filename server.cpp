@@ -1,7 +1,7 @@
 #include "server.h"
 
 //client thread
-void* clientThread(void* clientSock) {
+void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
 	if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
 		showError("msg recive error");
