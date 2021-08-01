@@ -10,6 +10,11 @@
 #include <softPwm.h>
 
 //server
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <pthread.h>
 
 using namespace std;
 
