@@ -6,6 +6,8 @@ Server::Server(int PORT) {
 	if((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 		showError("create server socket error");
 	}
+	showError("create server socket success");
+	
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(PORT);
 	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -21,6 +23,7 @@ void Server::bindSocket() {
 	if(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
 		showError("bind server socket error");
 	}
+	showError("bind server socket success");
 }
 
 //listen
@@ -28,6 +31,7 @@ void Server::listenSocket() {
 	if(listen(serverSocket, 1) < 0) {
 		showError("server listen error");
 	}
+	showError("server listen success");
 }
 
 //accept
@@ -39,6 +43,7 @@ void Server::acceptSocket() {
 		if(clientSocket < 0) {
 			showError("accept client error");
 		}
+		showError("accept client success");
 		pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 	}
 }
@@ -48,6 +53,7 @@ void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
 	char msgbuf[BUFSIZE + 1];
 	Server server;
+	server.showError("create thread success");
 	
 	while(true) {
 		if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
@@ -101,4 +107,5 @@ void Server::createServer(int PORT) {
 	server.bindSocket();
 	server.listenSocket();
 	server.acceptSocket();
+	showError("create server success");
 }
