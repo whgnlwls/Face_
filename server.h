@@ -1,12 +1,12 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "sensorControl.h"
+#include "DoorLockHead.h"
 
 #define BUFSIZE 512
 
 //class
-class Server extends SensorControl {
+class Server {
 private:
 	int serverSocket;
 	int clientSocket;
@@ -17,6 +17,8 @@ private:
 	char msgbuf[BUFSIZE + 1];
 
 protected:
+	
+public:
 	//initialize
 	Server() {};
 	Server(int PORT);
@@ -34,8 +36,7 @@ protected:
 	
 	//thread
 	void* clientThread(void* clientSock);
-	
-public:
+
 	//print error
 	void showError(const char* msg);
 	
