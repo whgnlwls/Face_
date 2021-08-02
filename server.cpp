@@ -6,7 +6,7 @@ void* Server::clientThread(void* clientSock) {
 	
 	while(true) {
 		if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
-		Server::showError("msg recive error");
+		showError("msg recive error");
 		}
 		cout << "[CLIENT] : " << msgbuf << endl;
 	
@@ -25,7 +25,7 @@ void* Server::clientThread(void* clientSock) {
 			if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
 				//server send message
 				if (send(threadClientSocket, "adminstrator", threadClientSocket, 0) < 0) {
-					Server::showError("msg send error");
+					showError("msg send error");
 					break;
 				}
 				cout << "[SERVER] : send adminstrator to client" << endl;
@@ -41,35 +41,36 @@ void* Server::clientThread(void* clientSock) {
 	
 		}
 	}
+	return 0;
 }
 
 //initialize
 //create socket
 Server::Server(int PORT) {
-	if((Server::serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		Server::showError("create server socket error");
+	if((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+		showError("create server socket error");
 	}
-	Server::serverAddr.sin_family = AF_INET;
-	Server::serverAddr.sin_port = htons(PORT);
-	Server::serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(PORT);
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 }
 
 //close socket
 Server::~Server() {
-	close(Server::serverSocket);
+	close(serverSocket);
 }
 
 //bind
 void Server::bindSocket() {
-	if(bind(Server::serverSocket, (struct sockaddr*)&Server::serverAddr, sizeof(Server::serverAddr)) < 0) {
-		Server::showError("bind server socket error");
+	if(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+		showError("bind server socket error");
 	}
 }
 
 //listen
 void Server::listenSocket() {
-	if(listen(Server::serverSocket, 1) < 0) {
-		Server::showError("server listen error");
+	if(listen(serverSocket, 1) < 0) {
+		showError("server listen error");
 	}
 }
 
@@ -78,11 +79,11 @@ void Server::acceptSocket() {
 	//create client thread
 	pthread_t cthread;
 	while(true) {
-		Server::clientSocket = accept(Server::serverSocket, (struct sockaddr*)&Server::clientAddr, (socklen_t*)sizeof(Server::clientAddr));
-		if(Server::clientSocket < 0) {
-			Server::showError("accept client error");
+		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)sizeof(clientAddr));
+		if(clientSocket < 0) {
+			showError("accept client error");
 		}
-		pthread_create(&cthread, NULL, clientThread, (void*)&Server::clientSocket);
+		pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 	}
 }
 
