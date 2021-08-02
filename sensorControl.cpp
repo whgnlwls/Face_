@@ -2,15 +2,15 @@
 
 //initialize
 SensorControl::SensorControl(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor) {
-	SensorControl::pinBuzzer = pinBuzzer;
-	SensorControl::pinUltraSonicTrig = pinUltraSonicTrig;
-	SensorControl::pinUltraSonicEcho = pinUltraSonicEcho;
-	SensorControl::pinMotor = pinMotor;
+	pinBuzzer = pinBuzzer;
+	pinUltraSonicTrig = pinUltraSonicTrig;
+	pinUltraSonicEcho = pinUltraSonicEcho;
+	pinMotor = pinMotor;
 
-	pinMode(SensorControl::pinBuzzer, OUTPUT);
-	pinMode(SensorControl::pinUltraSonicTrig, OUTPUT);
-	pinMode(SensorControl::pinUltraSonicEcho, INPUT);
-	pinMode(SensorControl::pinMotor, OUTPUT);
+	pinMode(pinBuzzer, OUTPUT);
+	pinMode(pinUltraSonicTrig, OUTPUT);
+	pinMode(pinUltraSonicEcho, INPUT);
+	pinMode(pinMotor, OUTPUT);
 
 	printf("pinNum : buz %d, ulst %d, ulse %d, mot %d\n", pinBuzzer, pinUltraSonicTrig, pinUltraSonicEcho, pinMotor);
 }
