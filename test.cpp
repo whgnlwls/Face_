@@ -17,7 +17,7 @@ int main() {
 	}
 	sensor.MTsetOpen();
 	sensor.MTsetClose();
-	
+
 	Server server;
 	server.createServer(9000);
 	
