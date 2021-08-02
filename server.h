@@ -35,7 +35,7 @@ public:
 	void acceptSocket();
 	
 	//thread
-	void* clientThread(void* clientSock);
+	static void* clientThread(void* clientSock);
 
 	//print error
 	void showError(const char* msg);
