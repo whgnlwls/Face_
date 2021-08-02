@@ -1,49 +1,5 @@
 #include "server.h"
 
-//client thread
-void* Server::clientThread(void* clientSock) {
-	int threadClientSocket = *(int*)clientSock;
-	
-	while(true) {
-		if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
-		showError("msg recive error");
-		}
-		cout << "[CLIENT] : " << msgbuf << endl;
-	
-		//create token
-		vector<string> tokenVector;
-		stringstream msgStream(msgbuf);
-		string tokenizer;
-	
-		while (getline(msgStream, tokenizer, '$')) {
-			tokenVector.push_back(tokenizer);
-		}
-
-		//token works
-		if (tokenVector[0] == "login") {
-			//admin?
-			if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
-				//server send message
-				if (send(threadClientSocket, "adminstrator", threadClientSocket, 0) < 0) {
-					showError("msg send error");
-					break;
-				}
-				cout << "[SERVER] : send adminstrator to client" << endl;
-			}
-			//or?
-			//coding anything
-		
-		}
-		else if (tokenVector[0] == "open") {
-
-		}
-		else if (tokenVector[0] == "close") {
-	
-		}
-	}
-	return 0;
-}
-
 //initialize
 //create socket
 Server::Server(int PORT) {
@@ -85,6 +41,52 @@ void Server::acceptSocket() {
 		}
 		pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 	}
+}
+
+//client thread
+void* Server::clientThread(void* clientSock) {
+	int threadClientSocket = *(int*)clientSock;
+	char msgbuf[BUFSIZE + 1];
+	Server server;
+	
+	while(true) {
+		if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
+		server.showError("msg recive error");
+		}
+		cout << "[CLIENT] : " << msgbuf << endl;
+	
+		//create token
+		vector<string> tokenVector;
+		stringstream msgStream(msgbuf);
+		string tokenizer;
+	
+		while (getline(msgStream, tokenizer, '$')) {
+			tokenVector.push_back(tokenizer);
+		}
+
+		//token works
+		if (tokenVector[0] == "login") {
+			//admin?
+			if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
+				//server send message
+				if (send(threadClientSocket, "adminstrator", threadClientSocket, 0) < 0) {
+					server.showError("msg send error");
+					break;
+				}
+				cout << "[SERVER] : send adminstrator to client" << endl;
+			}
+			//or?
+			//coding anything
+		
+		}
+		else if (tokenVector[0] == "open") {
+
+		}
+		else if (tokenVector[0] == "close") {
+	
+		}
+	}
+	return NULL;
 }
 
 //print error
