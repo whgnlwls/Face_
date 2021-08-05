@@ -63,7 +63,7 @@ void Server::acceptSocket() {
 //client thread
 void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
-	char msgbuf[BUFSIZE + 1];
+	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
 	cout << "create thread success" << endl;
 	
@@ -89,7 +89,7 @@ void* Server::clientThread(void* clientSock) {
 				//admin?
 				if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
 					//server send message
-					if (write(threadClientSocket, "adminstrator", threadClientSocket) <= 0) {
+					if (write(threadClientSocket, "adminstrator", msgbufsize) <= 0) {
 						cout << "msg send error" << endl;
 						break;
 					}
@@ -97,16 +97,14 @@ void* Server::clientThread(void* clientSock) {
 						cout << "[SERVER] : send adminstrator to client" << endl;
 					}
 				}
-				//or?
-				//coding anything
-		
 			}
 			else if (tokenVector[0] == "open") {
-
+				cout << "now open" << endl;
 			}
 			else if (tokenVector[0] == "close") {
-	
+				cout << "now close" << endl;
 			}
+			break;
 		}
 	}
 	close(threadClientSocket);
