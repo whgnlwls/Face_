@@ -47,8 +47,9 @@ void Server::listenSocket() {
 void Server::acceptSocket() {
 	//create client thread
 	pthread_t cthread;
-	while(true) {
-		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)sizeof(clientAddr));
+	int clientAddrlen = sizeof(clientAddr);
+	while(1) {
+		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)&clientAddrlen);
 		if(clientSocket < 0) {
 			cout << "accept client error" << endl;
 		}
@@ -66,13 +67,14 @@ void* Server::clientThread(void* clientSock) {
 	int msgbufsize = sizeof(msgbuf);
 	cout << "create thread success" << endl;
 	
-	while(true) {
-		if(recv(threadClientSocket, msgbuf, &msgbufsize, 0) < 0) {
+	while(1) {
+		if(read(threadClientSocket, msgbuf, msgbufsize) <= 0) {
 		cout << "msg recive error" << endl;
+		break;
 		}
 		else {
 			cout << "[CLIENT] : " << msgbuf << endl;
-	
+			
 			//create token
 			vector<string> tokenVector;
 			stringstream msgStream(msgbuf);
@@ -87,8 +89,9 @@ void* Server::clientThread(void* clientSock) {
 				//admin?
 				if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
 					//server send message
-					if (send(threadClientSocket, "adminstrator", threadClientSocket, 0) < 0) {
+					if (write(threadClientSocket, "adminstrator", threadClientSocket) <= 0) {
 						cout << "msg send error" << endl;
+						break;
 					}
 					else {
 						cout << "[SERVER] : send adminstrator to client" << endl;
@@ -106,7 +109,9 @@ void* Server::clientThread(void* clientSock) {
 			}
 		}
 	}
-	return NULL;
+	close(threadClientSocket);
+	
+	return 0;
 }
 
 //print error
