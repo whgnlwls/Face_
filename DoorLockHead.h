@@ -10,6 +10,7 @@
 #include <softPwm.h>
 
 //server
+#include <cstring>
 #include <vector>
 #include <sstream>
 #include <unistd.h>
