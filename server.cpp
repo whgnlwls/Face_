@@ -90,7 +90,9 @@ void* Server::clientThread(void* clientSock) {
 					if (send(threadClientSocket, "adminstrator", threadClientSocket, 0) < 0) {
 						cout << "msg send error" << endl;
 					}
-					cout << "[SERVER] : send adminstrator to client" << endl;
+					else {
+						cout << "[SERVER] : send adminstrator to client" << endl;
+					}
 				}
 				//or?
 				//coding anything
