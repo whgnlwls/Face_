@@ -44,7 +44,7 @@ void Server::acceptSocket() {
 	while(true) {
 		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)sizeof(clientAddr));
 		if(clientSocket < 0) {
-			showError("accept client error");
+			cout << "accept client error" << endl;
 		}
 		cout << "accept client success" << endl;
 		
