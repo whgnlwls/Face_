@@ -107,6 +107,6 @@ void Server::createServer(int PORT) {
 	Server server = Server(PORT);
 	server.bindSocket();
 	server.listenSocket();
-	server.acceptSocket();
 	cout << "create server success" << endl;
+	server.acceptSocket();
 }
