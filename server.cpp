@@ -61,7 +61,7 @@ void* Server::clientThread(void* clientSock) {
 	
 	while(true) {
 		if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
-		server.showError("msg recive error");
+		cout << "msg recive error" << endl;
 		}
 		cout << "[CLIENT] : " << msgbuf << endl;
 	
