@@ -62,12 +62,12 @@ void Server::acceptSocket() {
 //client thread
 void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
-	char msgbuf[BUFSIZE + 1] = "";
-	Server server;
+	char msgbuf[BUFSIZE + 1];
+	int msgbufsize = sizeof(msgbuf);
 	cout << "create thread success" << endl;
 	
 	while(true) {
-		if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
+		if(recv(threadClientSocket, msgbuf, &msgbufsize, 0) < 0) {
 		cout << "msg recive error" << endl;
 		}
 		else {
