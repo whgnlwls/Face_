@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <cstring>
+#include <vector>
+#include <sstream>
+#include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
