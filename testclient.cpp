@@ -1,4 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+
+//sensor control
+#include <wiringPi.h>
+#include <softPwm.h>
+
+//server
 #include <cstring>
 #include <vector>
 #include <sstream>
@@ -7,14 +15,18 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <pthread.h>
+
+using namespace std;
  
-#define BUF_LEN 512
+#define BUF_LEN 1024
 
 int main(int argc, char *argv[])
 {
         int s;
         char* haddr;
         struct sockaddr_in server_addr;
+        char buf[BUF_LEN] = "";
+        int bufsize = sizeof(buf);
         //struct sockaddr_in server_addr : 서버의 소켓주소 구조체
  
         if(argc != 2)
@@ -45,15 +57,13 @@ int main(int argc, char *argv[])
                 printf("can't connect.\n");
                 return 0;
         }
- 
-        int once = 0;
         
         while(1)
         {
-                if(once == 0) {
-                        write(s, "login$admin$admin", BUF_LEN);
-                        once = 1;
-                }
+                cin >> buf;
+                write(s, buf, bufsize);
+                read(s, buf, bufsize);
+                cout << buf << endl;
         }
  
         close(s);
