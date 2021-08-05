@@ -6,12 +6,14 @@ Server::Server(int PORT) {
 	if((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 		showError("create server socket error");
 	}
-	cout << "create server socket success" << endl;
+	else {
+		cout << "create server socket success" << endl;
 	
-	memset(&serverAddr, 0, sizeof(serverAddr));
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(PORT);
-	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		memset(&serverAddr, 0, sizeof(serverAddr));
+		serverAddr.sin_family = AF_INET;
+		serverAddr.sin_port = htons(PORT);
+		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	}
 }
 
 //close socket
@@ -26,7 +28,9 @@ void Server::bindSocket() {
 	if(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
 		showError("bind server socket error");
 	}
-	cout << "bind server socket success" << endl;
+	else {
+		cout << "bind server socket success" << endl;
+	}
 }
 
 //listen
@@ -34,7 +38,9 @@ void Server::listenSocket() {
 	if(listen(serverSocket, 1) < 0) {
 		showError("server listen error");
 	}
-	cout << "server listen success" << endl;
+	else {
+		cout << "server listen success" << endl;
+	}
 }
 
 //accept
@@ -46,9 +52,10 @@ void Server::acceptSocket() {
 		if(clientSocket < 0) {
 			cout << "accept client error" << endl;
 		}
-		cout << "accept client success" << endl;
-		
-		pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
+		else {
+			cout << "accept client success" << endl;
+			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
+		}
 	}
 }
 
@@ -63,37 +70,38 @@ void* Server::clientThread(void* clientSock) {
 		if(recv(threadClientSocket, msgbuf, BUFSIZE, 0) < 0) {
 		cout << "msg recive error" << endl;
 		}
-		cout << "[CLIENT] : " << msgbuf << endl;
+		else {
+			cout << "[CLIENT] : " << msgbuf << endl;
 	
-		//create token
-		vector<string> tokenVector;
-		stringstream msgStream(msgbuf);
-		string tokenizer;
+			//create token
+			vector<string> tokenVector;
+			stringstream msgStream(msgbuf);
+			string tokenizer;
 	
-		while (getline(msgStream, tokenizer, '$')) {
-			tokenVector.push_back(tokenizer);
-		}
-
-		//token works
-		if (tokenVector[0] == "login") {
-			//admin?
-			if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
-				//server send message
-				if (send(threadClientSocket, "adminstrator", threadClientSocket, 0) < 0) {
-					server.showError("msg send error");
-					break;
-				}
-				cout << "[SERVER] : send adminstrator to client" << endl;
+			while (getline(msgStream, tokenizer, '$')) {
+				tokenVector.push_back(tokenizer);
 			}
-			//or?
-			//coding anything
-		
-		}
-		else if (tokenVector[0] == "open") {
 
-		}
-		else if (tokenVector[0] == "close") {
+			//token works
+			if (tokenVector[0] == "login") {
+				//admin?
+				if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
+					//server send message
+					if (send(threadClientSocket, "adminstrator", threadClientSocket, 0) < 0) {
+						cout << "msg send error" << endl;
+					}
+					cout << "[SERVER] : send adminstrator to client" << endl;
+				}
+				//or?
+				//coding anything
+		
+			}
+			else if (tokenVector[0] == "open") {
+
+			}
+			else if (tokenVector[0] == "close") {
 	
+			}
 		}
 	}
 	return NULL;
