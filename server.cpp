@@ -55,7 +55,7 @@ void Server::acceptSocket() {
 //client thread
 void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
-	char msgbuf[BUFSIZE + 1];
+	char msgbuf[BUFSIZE + 1] = "";
 	Server server;
 	cout << "create thread success" << endl;
 	
