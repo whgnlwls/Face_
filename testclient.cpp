@@ -1,21 +1,16 @@
-#include <cstring>
-#include <vector>
-#include <sstream>
-#include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <pthread.h>
  
-#define BUF_LEN 128
- 
+#define BUF_LEN 512
+
 int main(int argc, char *argv[])
 {
-        int s, n;
+        int s;
         char* haddr;
         struct sockaddr_in server_addr;
         //struct sockaddr_in server_addr : 서버의 소켓주소 구조체
-        char buf[BUF_LEN+1];
  
         if(argc != 2)
         {
@@ -46,9 +41,14 @@ int main(int argc, char *argv[])
                 return 0;
         }
  
-        while((n = read(s, buf, BUF_LEN)) > 0)
-        {//서버가 보내오는 daytime 데이터의 수신
-                printf("%s", buf);
+        int once = 0;
+        
+        while(1)
+        {
+                if(once == 0) {
+                        write(s, "login$admin$admin", BUF_LEN);
+                        once = 1;
+                }
         }
  
         close(s);
