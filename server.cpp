@@ -15,6 +15,8 @@ Server::Server(int PORT) {
 
 //close socket
 Server::~Server() {
+	pthread_exit((void*)clientThread);
+	
 	close(serverSocket);
 }
 
