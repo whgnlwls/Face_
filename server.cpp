@@ -104,7 +104,6 @@ void* Server::clientThread(void* clientSock) {
 			else if (tokenVector[0] == "close") {
 				cout << "now close" << endl;
 			}
-			break;
 		}
 	}
 	close(threadClientSocket);
