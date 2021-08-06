@@ -76,10 +76,8 @@ void* Server::loginThread(void* clientSock) {
 	socklen_t loginThreadAddrlen = sizeof(loginThreadAddr);
 	getpeername(threadClientSocket, (sockaddr*)&loginThreadAddr, &loginThreadAddrlen);
 	
-	cout << "[SERVER] : create CLIENT[" 
-						<< loginThreadAddr.sin_addr.s_addr 
-						<< ":" << loginThreadAddr.sin_port 
-						<< "] login thread success" << endl;
+	cout << "[SERVER] : create CLIENT[" << loginThreadAddr.sin_addr.s_addr 
+	<< ":" << loginThreadAddr.sin_port << "] login thread success" << endl;
 	
 	//thread work
 	while(1) {
@@ -134,9 +132,9 @@ void* Server::loginThread(void* clientSock) {
 				}
 				else {
 					cout << "[SERVER] : send exit to CLIENT[" 
-						<< loginThreadAddr.sin_addr.s_addr 
-						<< ":" << loginThreadAddr.sin_port 
-						<< "]"<< endl;
+					<< loginThreadAddr.sin_addr.s_addr 
+					<< ":" << loginThreadAddr.sin_port 
+					<< "]"<< endl;
 						
 					pthread_exit((void*)&loginThread);
 				}
@@ -149,9 +147,9 @@ void* Server::loginThread(void* clientSock) {
 				}
 				else {
 					cout << "[SERVER] : send command error to CLIENT[" 
-						<< loginThreadAddr.sin_addr.s_addr 
-						<< ":" << loginThreadAddr.sin_port 
-						<< "]"<< endl;
+					<< loginThreadAddr.sin_addr.s_addr 
+					<< ":" << loginThreadAddr.sin_port 
+					<< "]"<< endl;
 				}
 			}
 		}
@@ -172,10 +170,8 @@ void* Server::clientThread(void* clientSock) {
 	socklen_t clientThreadAddrlen = sizeof(clientThreadAddr);
 	getpeername(threadClientSocket, (sockaddr*)&clientThreadAddr, &clientThreadAddrlen);
 	
-	cout << "[SERVER] : create CLIENT[" 
-						<< clientThreadAddr.sin_addr.s_addr 
-						<< ":" << clientThreadAddr.sin_port 
-						<< "] function thread success" << endl;
+	cout << "[SERVER] : create CLIENT[" << clientThreadAddr.sin_addr.s_addr 
+	<< ":" << clientThreadAddr.sin_port << "] function thread success" << endl;
 	
 	//thread work
 	while(1) {
@@ -208,9 +204,9 @@ void* Server::clientThread(void* clientSock) {
 				}
 				else {
 					cout << "[SERVER] : send open to CLIENT[" 
-						<< clientThreadAddr.sin_addr.s_addr 
-						<< ":" << clientThreadAddr.sin_port 
-						<< "]"<< endl;
+					<< clientThreadAddr.sin_addr.s_addr 
+					<< ":" << clientThreadAddr.sin_port 
+					<< "]"<< endl;
 				}
 			}
 			else if (tokenVector[0] == "close") {
@@ -221,9 +217,9 @@ void* Server::clientThread(void* clientSock) {
 				}
 				else {
 					cout << "[SERVER] : send close to CLIENT[" 
-						<< clientThreadAddr.sin_addr.s_addr 
-						<< ":" << clientThreadAddr.sin_port 
-						<< "]"<< endl;
+					<< clientThreadAddr.sin_addr.s_addr 
+					<< ":" << clientThreadAddr.sin_port 
+					<< "]"<< endl;
 				}
 			}
 			else if (tokenVector[0] == "logout") {
@@ -234,11 +230,11 @@ void* Server::clientThread(void* clientSock) {
 				}
 				else {
 					cout << "[SERVER] : send logout to CLIENT[" 
-						<< clientThreadAddr.sin_addr.s_addr 
-						<< ":" << clientThreadAddr.sin_port 
-						<< "]"<< endl;
+					<< clientThreadAddr.sin_addr.s_addr 
+					<< ":" << clientThreadAddr.sin_port 
+					<< "]"<< endl;
 						
-						pthread_exit((void*)&clientThread);
+					pthread_exit((void*)&clientThread);
 				}
 			}
 			else {
@@ -249,9 +245,9 @@ void* Server::clientThread(void* clientSock) {
 				}
 				else {
 					cout << "[SERVER] : send command error to CLIENT[" 
-						<< clientThreadAddr.sin_addr.s_addr 
-						<< ":" << clientThreadAddr.sin_port 
-						<< "]"<< endl;
+					<< clientThreadAddr.sin_addr.s_addr 
+					<< ":" << clientThreadAddr.sin_port 
+					<< "]"<< endl;
 				}
 			}
 		}
