@@ -7,7 +7,8 @@ Server::Server(int PORT) {
 	}
 	else {
 		cout << "[SERVER] : create server socket success" << endl;
-	
+		
+		//set server socket typedef
 		memset(&serverAddr, 0, sizeof(serverAddr));
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_port = htons(PORT);
@@ -18,7 +19,6 @@ Server::Server(int PORT) {
 //close socket
 Server::~Server() {
 	pthread_exit((void*)clientThread);
-	
 	close(serverSocket);
 }
 
@@ -55,6 +55,8 @@ void Server::acceptSocket() {
 		else {
 			cout << "[SERVER] : CLIENT[" << clientAddr.sin_addr.s_addr << ":" 
 			<< clientAddr.sin_port << "] accept success" << endl;
+			
+			//create thread
 			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 		}
 	}
@@ -62,11 +64,12 @@ void Server::acceptSocket() {
 
 //client thread
 void* Server::clientThread(void* clientSock) {
+	//thread init
 	int threadClientSocket = *(int*)clientSock;
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
 	
-	//create client thread addr
+	//set client socket typedef
 	sockaddr_in clientThreadAddr;
 	socklen_t clientThreadAddrlen = sizeof(clientThreadAddr);
 	getpeername(threadClientSocket, (sockaddr*)&clientThreadAddr, &clientThreadAddrlen);
@@ -76,7 +79,9 @@ void* Server::clientThread(void* clientSock) {
 						<< ":" << clientThreadAddr.sin_port 
 						<< "] thread success" << endl;
 	
+	//thread work
 	while(1) {
+		//set buffer
 		memset(msgbuf, 0, msgbufsize);
 		
 		if(recv(threadClientSocket, msgbuf, msgbufsize, 0) <= 0) {
