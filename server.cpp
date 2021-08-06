@@ -68,6 +68,8 @@ void* Server::clientThread(void* clientSock) {
 	cout << "create thread success" << endl;
 	
 	while(1) {
+		memset(msgbuf, 0, msgbufsize);
+		
 		if(read(threadClientSocket, msgbuf, msgbufsize) <= 0) {
 		cout << "msg recive error" << endl;
 		break;
