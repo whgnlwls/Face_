@@ -33,7 +33,7 @@ public:
 	void acceptSocket();
 	
 	//thread
-	static void* clientThread(void* clientSock);
+	static void* loginThread(void* clientSock);
 
 	//print error
 	void showError(const char* msg);
