@@ -18,7 +18,7 @@ Server::Server(int PORT) {
 
 //close socket
 Server::~Server() {
-	pthread_exit((void*)clientThread);
+	pthread_exit((void*)loginThread);
 	close(serverSocket);
 }
 
@@ -57,13 +57,13 @@ void Server::acceptSocket() {
 			<< clientAddr.sin_port << "] accept success" << endl;
 			
 			//create thread
-			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
+			pthread_create(&cthread, NULL, loginThread, (void*)&clientSocket);
 		}
 	}
 }
 
 //client thread
-void* Server::clientThread(void* clientSock) {
+void* Server::loginThread(void* clientSock) {
 	//thread init
 	int threadClientSocket = *(int*)clientSock;
 	char msgbuf[BUFSIZE];
