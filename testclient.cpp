@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
         }
         
         while(1) {
+                //set buffer
                 memset(buf, 0, bufsize);
                 
                 cout << "[CLIENT] : ";
