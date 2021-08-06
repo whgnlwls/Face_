@@ -18,14 +18,14 @@
 
 using namespace std;
  
-#define BUF_LEN 1024
+#define BUF_LEN 512
 
 int main(int argc, char *argv[])
 {
         int s;
         char* haddr;
         struct sockaddr_in server_addr;
-        char buf[BUF_LEN] = "";
+        char buf[BUF_LEN];
         int bufsize = sizeof(buf);
         //struct sockaddr_in server_addr : 서버의 소켓주소 구조체
  
@@ -60,10 +60,13 @@ int main(int argc, char *argv[])
         
         while(1)
         {
+                memset(buf, 0, bufsize);
                 cin >> buf;
-                write(s, buf, bufsize);
-                read(s, buf, bufsize);
-                cout << buf << endl;
+                send(s, buf, bufsize, 0);
+                
+                if(recv(s, buf, bufsize, 0) > 0) {
+                        cout << buf << endl;
+                }
         }
  
         close(s);
