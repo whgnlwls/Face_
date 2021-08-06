@@ -54,7 +54,7 @@ void Server::acceptSocket() {
 			cout << "accept client error" << endl;
 		}
 		else {
-			cout << "accept client success" << endl;
+			cout << "accept client" << "[" << clientAddr.sin_addr.s_addr << ":" << clientAddr.sin_port << "] success" << endl;
 			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 		}
 	}
