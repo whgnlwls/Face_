@@ -1,6 +1,5 @@
 #include "server.h"
 
-//initialize
 //create socket
 Server::Server(int PORT) {
 	if((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
