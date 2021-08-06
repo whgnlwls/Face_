@@ -4,10 +4,10 @@
 //create socket
 Server::Server(int PORT) {
 	if((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		showError("create server socket error");
+		showError("[SERVER] : create server socket error");
 	}
 	else {
-		cout << "create server socket success" << endl;
+		cout << "[SERVER] : create server socket success" << endl;
 	
 		memset(&serverAddr, 0, sizeof(serverAddr));
 		serverAddr.sin_family = AF_INET;
@@ -26,20 +26,20 @@ Server::~Server() {
 //bind
 void Server::bindSocket() {
 	if(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
-		showError("bind server socket error");
+		showError("[SERVER] : bind server socket error");
 	}
 	else {
-		cout << "bind server socket success" << endl;
+		cout << "[SERVER] : bind server socket success" << endl;
 	}
 }
 
 //listen
 void Server::listenSocket() {
 	if(listen(serverSocket, 1) < 0) {
-		showError("server listen error");
+		showError("[SERVER] : server listen error");
 	}
 	else {
-		cout << "server listen success" << endl;
+		cout << "[SERVER] : server listen success" << endl;
 	}
 }
 
@@ -51,10 +51,11 @@ void Server::acceptSocket() {
 	while(1) {
 		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)&clientAddrlen);
 		if(clientSocket < 0) {
-			cout << "accept client error" << endl;
+			cout << "[SERVER] : accept client error" << endl;
 		}
 		else {
-			cout << "accept client" << "[" << clientAddr.sin_addr.s_addr << ":" << clientAddr.sin_port << "] success" << endl;
+			cout << "[SERVER] : CLIENT[" << clientAddr.sin_addr.s_addr << ":" 
+			<< clientAddr.sin_port << "] accept success" << endl;
 			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 		}
 	}
@@ -65,17 +66,28 @@ void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
-	cout << "create thread success" << endl;
+	
+	//create client thread addr
+	sockaddr_in clientThreadAddr;
+	socklen_t clientThreadAddrlen = sizeof(clientThreadAddr);
+	getpeername(threadClientSocket, (sockaddr*)&clientThreadAddr, &clientThreadAddrlen);
+	
+	cout << "[SERVER] : create CLIENT[" 
+						<< clientThreadAddr.sin_addr.s_addr 
+						<< ":" << clientThreadAddr.sin_port 
+						<< "] thread success" << endl;
 	
 	while(1) {
 		memset(msgbuf, 0, msgbufsize);
 		
-		if(read(threadClientSocket, msgbuf, msgbufsize) <= 0) {
-		cout << "msg recive error" << endl;
-		break;
+		if(recv(threadClientSocket, msgbuf, msgbufsize, 0) <= 0) {
+			cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr 
+			<< ":" << clientThreadAddr.sin_port << "] has exit" << endl;
+			break;
 		}
 		else {
-			cout << "[CLIENT] : " << msgbuf << endl;
+			cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr 
+			<< ":" << clientThreadAddr.sin_port << "] : " << msgbuf << endl;
 			
 			//create token
 			vector<string> tokenVector;
@@ -91,20 +103,55 @@ void* Server::clientThread(void* clientSock) {
 				//admin?
 				if (tokenVector[1] == "admin" && tokenVector[2] == "admin") {
 					//server send message
-					if (write(threadClientSocket, "adminstrator", msgbufsize) <= 0) {
-						cout << "msg send error" << endl;
+					if (send(threadClientSocket, "adminstrator", msgbufsize, 0) <= 0) {
+						cout << "[SERVER] : msg send error" << endl;
 						break;
 					}
 					else {
-						cout << "[SERVER] : send adminstrator to client" << endl;
+						cout << "[SERVER] : send adminstrator to CLIENT[" 
+						<< clientThreadAddr.sin_addr.s_addr 
+						<< ":" << clientThreadAddr.sin_port 
+						<< "]"<< endl;
 					}
 				}
 			}
 			else if (tokenVector[0] == "open") {
-				cout << "now open" << endl;
+				//server send message
+				if (send(threadClientSocket, "now open", msgbufsize, 0) <= 0) {
+					cout << "[SERVER] : msg send error" << endl;
+					break;
+				}
+				else {
+					cout << "[SERVER] : send now open to CLIENT[" 
+						<< clientThreadAddr.sin_addr.s_addr 
+						<< ":" << clientThreadAddr.sin_port 
+						<< "]"<< endl;
+				}
 			}
 			else if (tokenVector[0] == "close") {
-				cout << "now close" << endl;
+				//server send message
+				if (send(threadClientSocket, "now close", msgbufsize, 0) <= 0) {
+					cout << "[SERVER] : msg send error" << endl;
+					break;
+				}
+				else {
+					cout << "[SERVER] : send now close to CLIENT[" 
+						<< clientThreadAddr.sin_addr.s_addr 
+						<< ":" << clientThreadAddr.sin_port 
+						<< "]"<< endl;
+				}
+			}
+			else {
+				if(send(threadClientSocket, "command error", msgbufsize, 0) <= 0) {
+					cout << "[SERVER] : msg send error" << endl;
+					break;
+				}
+				else {
+					cout << "[SERVER] : send command error to CLIENT[" 
+						<< clientThreadAddr.sin_addr.s_addr 
+						<< ":" << clientThreadAddr.sin_port 
+						<< "]"<< endl;
+				}
 			}
 		}
 	}
@@ -124,6 +171,6 @@ void Server::createServer(int PORT) {
 	Server server = Server(PORT);
 	server.bindSocket();
 	server.listenSocket();
-	cout << "create server success" << endl;
+	cout << "[SERVER] : create server success" << endl;
 	server.acceptSocket();
 }
