@@ -18,7 +18,7 @@ Server::Server(int PORT) {
 
 //close socket
 Server::~Server() {
-	pthread_exit((void*)loginThread);
+	close(clientSocket);
 	close(serverSocket);
 }
 
@@ -45,8 +45,9 @@ void Server::listenSocket() {
 //accept
 void Server::acceptSocket() {
 	//create client thread
-	pthread_t cthread;
+	pthread_t lthread;
 	int clientAddrlen = sizeof(clientAddr);
+	
 	while(1) {
 		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)&clientAddrlen);
 		if(clientSocket < 0) {
@@ -57,27 +58,28 @@ void Server::acceptSocket() {
 			<< clientAddr.sin_port << "] accept success" << endl;
 			
 			//create thread
-			pthread_create(&cthread, NULL, loginThread, (void*)&clientSocket);
+			pthread_create(&lthread, NULL, loginThread, (void*)&clientSocket);
 		}
 	}
 }
 
-//client thread
+//login thread
 void* Server::loginThread(void* clientSock) {
 	//thread init
 	int threadClientSocket = *(int*)clientSock;
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
+	void* waited;
 	
 	//set client socket typedef
-	sockaddr_in clientThreadAddr;
-	socklen_t clientThreadAddrlen = sizeof(clientThreadAddr);
-	getpeername(threadClientSocket, (sockaddr*)&clientThreadAddr, &clientThreadAddrlen);
+	sockaddr_in loginThreadAddr;
+	socklen_t loginThreadAddrlen = sizeof(loginThreadAddr);
+	getpeername(threadClientSocket, (sockaddr*)&loginThreadAddr, &loginThreadAddrlen);
 	
 	cout << "[SERVER] : create CLIENT[" 
-						<< clientThreadAddr.sin_addr.s_addr 
-						<< ":" << clientThreadAddr.sin_port 
-						<< "] thread success" << endl;
+						<< loginThreadAddr.sin_addr.s_addr 
+						<< ":" << loginThreadAddr.sin_port 
+						<< "] login thread success" << endl;
 	
 	//thread work
 	while(1) {
@@ -85,13 +87,13 @@ void* Server::loginThread(void* clientSock) {
 		memset(msgbuf, 0, msgbufsize);
 		
 		if(recv(threadClientSocket, msgbuf, msgbufsize, 0) <= 0) {
-			cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr 
-			<< ":" << clientThreadAddr.sin_port << "] has exit" << endl;
+			cout << "[SERVER] : CLIENT[" << loginThreadAddr.sin_addr.s_addr 
+			<< ":" << loginThreadAddr.sin_port << "] has exit from login thread" << endl;
 			break;
 		}
 		else {
-			cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr 
-			<< ":" << clientThreadAddr.sin_port << "] : " << msgbuf << endl;
+			cout << "[SERVER] : CLIENT[" << loginThreadAddr.sin_addr.s_addr 
+			<< ":" << loginThreadAddr.sin_port << "] : " << msgbuf << endl;
 			
 			//create token
 			vector<string> tokenVector;
@@ -113,20 +115,99 @@ void* Server::loginThread(void* clientSock) {
 					}
 					else {
 						cout << "[SERVER] : send adminstrator to CLIENT[" 
-						<< clientThreadAddr.sin_addr.s_addr 
-						<< ":" << clientThreadAddr.sin_port 
+						<< loginThreadAddr.sin_addr.s_addr 
+						<< ":" << loginThreadAddr.sin_port 
 						<< "]"<< endl;
+						
+						pthread_t cthread;
+						pthread_create(&cthread, NULL, clientThread, (void*)&threadClientSocket);
+						
+						pthread_join(cthread, &waited);
 					}
 				}
 			}
-			else if (tokenVector[0] == "open") {
+			else if (tokenVector[0] == "exit") {
 				//server send message
-				if (send(threadClientSocket, "now open", msgbufsize, 0) <= 0) {
+				if (send(threadClientSocket, "exit", msgbufsize, 0) <= 0) {
 					cout << "[SERVER] : msg send error" << endl;
 					break;
 				}
 				else {
-					cout << "[SERVER] : send now open to CLIENT[" 
+					cout << "[SERVER] : send exit to CLIENT[" 
+						<< loginThreadAddr.sin_addr.s_addr 
+						<< ":" << loginThreadAddr.sin_port 
+						<< "]"<< endl;
+						
+					pthread_exit((void*)&loginThread);
+				}
+			}
+			else {
+				//server send message
+				if(send(threadClientSocket, "command error", msgbufsize, 0) <= 0) {
+					cout << "[SERVER] : msg send error" << endl;
+					break;
+				}
+				else {
+					cout << "[SERVER] : send command error to CLIENT[" 
+						<< loginThreadAddr.sin_addr.s_addr 
+						<< ":" << loginThreadAddr.sin_port 
+						<< "]"<< endl;
+				}
+			}
+		}
+	}
+	
+	return 0;
+}
+
+//client thread
+void* Server::clientThread(void* clientSock) {
+	//thread init
+	int threadClientSocket = *(int*)clientSock;
+	char msgbuf[BUFSIZE];
+	int msgbufsize = sizeof(msgbuf);
+	
+	//set client socket typedef
+	sockaddr_in clientThreadAddr;
+	socklen_t clientThreadAddrlen = sizeof(clientThreadAddr);
+	getpeername(threadClientSocket, (sockaddr*)&clientThreadAddr, &clientThreadAddrlen);
+	
+	cout << "[SERVER] : create CLIENT[" 
+						<< clientThreadAddr.sin_addr.s_addr 
+						<< ":" << clientThreadAddr.sin_port 
+						<< "] function thread success" << endl;
+	
+	//thread work
+	while(1) {
+		memset(msgbuf, 0, msgbufsize);
+		
+		if(recv(threadClientSocket, msgbuf, msgbufsize, 0) <= 0) {
+			cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr 
+			<< ":" << clientThreadAddr.sin_port << "] has exit from function thread" << endl;
+			break;
+		}
+		else {
+			cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr 
+			<< ":" << clientThreadAddr.sin_port << "] : " << msgbuf << endl;
+			
+			//create token
+			vector<string> tokenVector;
+			stringstream msgStream(msgbuf);
+			string tokenizer;
+			
+			while (getline(msgStream, tokenizer, '$')) {
+				tokenVector.push_back(tokenizer);
+			}
+			
+			//token works
+			if (tokenVector[0] == "open") {
+				//server send message
+				if (send(threadClientSocket, "open", msgbufsize, 0) <= 0) {
+					cout << "[SERVER] : msg send error" << endl;
+					break;
+				}
+				else {
+					cout << "[SERVER] : send open to CLIENT[" 
 						<< clientThreadAddr.sin_addr.s_addr 
 						<< ":" << clientThreadAddr.sin_port 
 						<< "]"<< endl;
@@ -134,18 +215,34 @@ void* Server::loginThread(void* clientSock) {
 			}
 			else if (tokenVector[0] == "close") {
 				//server send message
-				if (send(threadClientSocket, "now close", msgbufsize, 0) <= 0) {
+				if (send(threadClientSocket, "close", msgbufsize, 0) <= 0) {
 					cout << "[SERVER] : msg send error" << endl;
 					break;
 				}
 				else {
-					cout << "[SERVER] : send now close to CLIENT[" 
+					cout << "[SERVER] : send close to CLIENT[" 
 						<< clientThreadAddr.sin_addr.s_addr 
 						<< ":" << clientThreadAddr.sin_port 
 						<< "]"<< endl;
 				}
 			}
+			else if (tokenVector[0] == "logout") {
+				//server send message
+				if (send(threadClientSocket, "logout", msgbufsize, 0) <= 0) {
+					cout << "[SERVER] : msg send error" << endl;
+					break;
+				}
+				else {
+					cout << "[SERVER] : send logout to CLIENT[" 
+						<< clientThreadAddr.sin_addr.s_addr 
+						<< ":" << clientThreadAddr.sin_port 
+						<< "]"<< endl;
+						
+						pthread_exit((void*)&clientThread);
+				}
+			}
 			else {
+				//server send message
 				if(send(threadClientSocket, "command error", msgbufsize, 0) <= 0) {
 					cout << "[SERVER] : msg send error" << endl;
 					break;
