@@ -34,6 +34,7 @@ public:
 	
 	//thread
 	static void* loginThread(void* clientSock);
+	static void* functionThread(void* clientSock);
 
 	//print error
 	void showError(const char* msg);
