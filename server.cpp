@@ -57,7 +57,7 @@ void Server::acceptSocket() {
 			cout << "[SERVER] : CLIENT[" << clientAddr.sin_addr.s_addr << ":" 
 			<< clientAddr.sin_port << "] accept success" << endl;
 			
-			//create thread
+			//create login thread
 			pthread_create(&lthread, NULL, loginThread, (void*)&clientSocket);
 		}
 	}
@@ -117,6 +117,7 @@ void* Server::loginThread(void* clientSock) {
 						<< ":" << loginThreadAddr.sin_port 
 						<< "]"<< endl;
 						
+						//create function thread
 						pthread_t fthread;
 						pthread_create(&fthread, NULL, functionThread, (void*)&threadClientSocket);
 						
