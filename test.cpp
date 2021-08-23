@@ -1,5 +1,5 @@
-#include "sensorControl.h"
 #include "server.h"
+#include "sensorControl.h"
 
 #define buz 21
 #define ulst 28
@@ -9,15 +9,15 @@
 int main() {
 	if (wiringPiSetup() == -1) return -1;
 	
-	SensorControl sensor = SensorControl(buz, ulst, ulse, mot);
-	
-	sensor.BZsetBuzzer();
+	SensorControl sensorControl = SensorControl(buz, ulst, ulse, mot);
+	/*
+	sensorControl.BZsetBuzzer();
 	for(int i = 0; i < 5; i++) {
-		sensor.USgetDist();
+		sensorControl.USgetDist();
 	}
-	sensor.MTsetOpen();
-	sensor.MTsetClose();
-
+	sensorControl.MTsetOpen();
+	sensorControl.MTsetClose();
+	*/
 	Server server;
 	server.createServer(9000);
 	
