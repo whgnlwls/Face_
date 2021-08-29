@@ -1,7 +1,7 @@
 #include "server.h"
 
 //create socket
-Server::Server(int PORT) {
+Server::Server(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor, int PORT) : SensorControl(pinBuzzer, pinUltraSonicTrig, pinUltraSonicEcho, pinMotor) {
 	if((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 		showError("[SERVER] : create server socket error");
 	}
@@ -11,8 +11,6 @@ Server::Server(int PORT) {
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_port = htons(PORT);
 		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		
-		serverIsWork = "start";
 		
 		createServer();
 	}
@@ -42,16 +40,16 @@ void Server::listenSocket() {
 void Server::acceptSocket() {
 	//create client thread
 	pthread_t cthread;
-	pthread_t sthread;
 	int clientAddrlen = sizeof(clientAddr);
 
-	while(serverIsWork != "stop") {
+	while(1) {
 		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)&clientAddrlen);
+		
 		if(clientSocket < 0) {
 			cout << "[SERVER] : accept client error" << endl;
 		}
 		else {
-			//create login thread
+			//create server thread
 			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 		}
 	}
@@ -63,7 +61,8 @@ void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
-	string filePath = "/home/pi/testsrc/userAccount.txt";
+	string accountfilePath = "/home/pi/testsrc/userAccount.txt";
+	string doorLockStatPath = "/home/pi/testsrc/doorLockStat.txt";
 
 	//set client socket typedef
 	sockaddr_in clientThreadAddr;
@@ -114,7 +113,7 @@ void* Server::clientThread(void* clientSock) {
 					int ID_checked;
 					int PWD_checked;
 					
-					ifstream openFile(filePath.data());
+					ifstream openFile(accountfilePath.data());
 					if(openFile.is_open()) {
 						while(getline(openFile, accountData, '$')) {
 							ID_checked = 0;
@@ -174,7 +173,7 @@ void* Server::clientThread(void* clientSock) {
 				//send accounts list to client
 				vector<string> accountTokenVector;
 
-				ifstream openFile(filePath.data());
+				ifstream openFile(accountfilePath.data());
 				if(openFile.is_open()) {
 					string accountData;
 					string accountDataID;
@@ -233,7 +232,7 @@ void* Server::clientThread(void* clientSock) {
 						<< "]"<< endl;
 
 						//add accounts info to DB
-						ofstream writeFile(filePath.data(), ios::app);
+						ofstream writeFile(accountfilePath.data(), ios::app);
 						if(writeFile.is_open()) {
 							writeFile << tokenVector[2] << "," << tokenVector[3] << "$";
 							writeFile.close();
@@ -262,7 +261,7 @@ void* Server::clientThread(void* clientSock) {
 						string accountData;
 						string accountDataID;
 						
-						ifstream openFile(filePath.data());
+						ifstream openFile(accountfilePath.data());
 						if(openFile.is_open()) {
 							while(getline(openFile, accountData, '$')) {
 								beforeAccountTokenVector.push_back(accountData);
@@ -290,7 +289,7 @@ void* Server::clientThread(void* clientSock) {
 						}
 						
 						//refresh accounts info to DB
-						ofstream writeFile(filePath.data());
+						ofstream writeFile(accountfilePath.data());
 						if(writeFile.is_open()) {
 							for(int i =0; i < afterAccountTokenVector.size(); i++) {
 								writeFile << afterAccountTokenVector[i] << "$";
@@ -325,6 +324,13 @@ void* Server::clientThread(void* clientSock) {
 						<< clientThreadAddr.sin_addr.s_addr
 						<< ":" << clientThreadAddr.sin_port
 						<< "]"<< endl;
+						
+						//lock
+						ofstream writeFile(doorLockStatPath.data());
+						if(writeFile.is_open()) {
+							writeFile << "open";
+							writeFile.close();
+						}
 					}
 				}
 				else if (tokenVector[1] == "close") {
@@ -338,6 +344,13 @@ void* Server::clientThread(void* clientSock) {
 						<< clientThreadAddr.sin_addr.s_addr
 						<< ":" << clientThreadAddr.sin_port
 						<< "]"<< endl;
+						
+						//unlock
+						ofstream writeFile(doorLockStatPath.data());
+						if(writeFile.is_open()) {
+							writeFile << "close";
+							writeFile.close();
+						}
 					}
 				}
 				else if (tokenVector[1] == "logout") {

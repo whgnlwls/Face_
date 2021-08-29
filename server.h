@@ -1,29 +1,25 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "DoorLockHead.h"
+#include "sensorControl.h"
 
 #define BUFSIZE 512
 
 //class
-class Server {
+class Server : public SensorControl {
 private:
 	int serverSocket;
 	int clientSocket;
 	
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in clientAddr;
-	
-	string serverIsWork;
 
 protected:
 	
 public:
 	//initialize
 	Server() {};
-	Server(int PORT);
-	
-	
+	Server(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor, int PORT);
 	~Server();
 	
 	//bind
