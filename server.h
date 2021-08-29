@@ -13,6 +13,8 @@ private:
 	
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in clientAddr;
+	
+	string serverIsWork;
 
 protected:
 	
@@ -20,6 +22,7 @@ public:
 	//initialize
 	Server() {};
 	Server(int PORT);
+	
 	
 	~Server();
 	
@@ -39,7 +42,7 @@ public:
 	void showError(const char* msg);
 	
 	//create server
-	void createServer(int PORT);
+	void createServer();
 };
 
 #endif

@@ -6,13 +6,15 @@ Server::Server(int PORT) {
 		showError("[SERVER] : create server socket error");
 	}
 	else {
-		cout << "[SERVER] : create server socket success" << endl;
-
 		//set server socket typedef
 		memset(&serverAddr, 0, sizeof(serverAddr));
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_port = htons(PORT);
 		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		
+		serverIsWork = "start";
+		
+		createServer();
 	}
 }
 
@@ -27,9 +29,6 @@ void Server::bindSocket() {
 	if(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
 		showError("[SERVER] : bind server socket error");
 	}
-	else {
-		cout << "[SERVER] : bind server socket success" << endl;
-	}
 }
 
 //listen
@@ -37,26 +36,21 @@ void Server::listenSocket() {
 	if(listen(serverSocket, 1) < 0) {
 		showError("[SERVER] : server listen error");
 	}
-	else {
-		cout << "[SERVER] : server listen success" << endl;
-	}
 }
 
 //accept
 void Server::acceptSocket() {
 	//create client thread
 	pthread_t cthread;
+	pthread_t sthread;
 	int clientAddrlen = sizeof(clientAddr);
 
-	while(1) {
+	while(serverIsWork != "stop") {
 		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)&clientAddrlen);
 		if(clientSocket < 0) {
 			cout << "[SERVER] : accept client error" << endl;
 		}
 		else {
-			cout << "[SERVER] : CLIENT[" << clientAddr.sin_addr.s_addr << ":"
-			<< clientAddr.sin_port << "] accept success" << endl;
-
 			//create login thread
 			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 		}
@@ -69,14 +63,12 @@ void* Server::clientThread(void* clientSock) {
 	int threadClientSocket = *(int*)clientSock;
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
+	string filePath = "/home/pi/testsrc/userAccount.txt";
 
 	//set client socket typedef
 	sockaddr_in clientThreadAddr;
 	socklen_t clientThreadAddrlen = sizeof(clientThreadAddr);
 	getpeername(threadClientSocket, (sockaddr*)&clientThreadAddr, &clientThreadAddrlen);
-
-	cout << "[SERVER] : create CLIENT[" << clientThreadAddr.sin_addr.s_addr
-	<< ":" << clientThreadAddr.sin_port << "] client thread success" << endl;
 
 	//thread work
 	while(1) {
@@ -84,12 +76,11 @@ void* Server::clientThread(void* clientSock) {
 		memset(msgbuf, 0, msgbufsize);
 
 		if(recv(threadClientSocket, msgbuf, msgbufsize, 0) <= 0) {
-			cout << "[SERVER] : msg receive error" << endl;
 			break;
 		}
 		else {
-			cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr
-			<< ":" << clientThreadAddr.sin_port << "] : " << msgbuf << endl;
+			cout << "\n[CLIENT(" << clientThreadAddr.sin_addr.s_addr
+			<< ":" << clientThreadAddr.sin_port << ")] : " << msgbuf;
 
 			//create token
 			vector<string> tokenVector;
@@ -114,58 +105,118 @@ void* Server::clientThread(void* clientSock) {
 						<< clientThreadAddr.sin_addr.s_addr
 						<< ":" << clientThreadAddr.sin_port
 						<< "]"<< endl;
-						
-						//send accounts list
-						//read accounts info from file
-						ifstream openFile(filePath.data());
-						if(openFile.is_open()) {
-							string accountData;
-							while(getline(openFile, accountData)) {
-								if (send(threadClientSocket, accountData + "\r\n", msgbufsize, 0) <= 0) {
-									cout << "[SERVER] : msg send error" << endl;
-									break;
-								}
-							}
-							openFile.close();
+					}
+				}
+				else {
+					//check vaild account
+					vector<string> accountTokenVector;
+					string accountData;
+					int ID_checked;
+					int PWD_checked;
+					
+					ifstream openFile(filePath.data());
+					if(openFile.is_open()) {
+						while(getline(openFile, accountData, '$')) {
+							ID_checked = 0;
+							PWD_checked = 0;
 							
-							cout << "[SERVER] : send accounts info to CLIENT["
+							istringstream account(accountData);
+							while(getline(account, accountData, ',')) {
+								if(tokenVector[1] == accountData) ID_checked = 1;
+								if(tokenVector[2] == accountData) PWD_checked = 1;
+							}
+							
+							if(ID_checked == 1 && PWD_checked == 1) break;
+							else if (ID_checked == 1 && PWD_checked != 1) break;
+						}
+						openFile.close();
+					}
+					
+					if(ID_checked == 1 && PWD_checked == 1) {
+						if (send(threadClientSocket, "general\r\n", msgbufsize, 0) <= 0) {
+							cout << "[SERVER] : msg send error" << endl;
+							break;
+						}
+						else {
+							cout << "[SERVER] : send general to CLIENT["
+							<< clientThreadAddr.sin_addr.s_addr
+							<< ":" << clientThreadAddr.sin_port
+							<< "]"<< endl;
+						}
+					}
+					else if(ID_checked == 1 && PWD_checked != 1) {
+						if (send(threadClientSocket, "invalid_pwd\r\n", msgbufsize, 0) <= 0) {
+							cout << "[SERVER] : msg send error" << endl;
+							break;
+						}
+						else {
+							cout << "[SERVER] : send invalid_pwd to CLIENT["
+							<< clientThreadAddr.sin_addr.s_addr
+							<< ":" << clientThreadAddr.sin_port
+							<< "]"<< endl;
+						}
+					}
+					else {
+						if (send(threadClientSocket, "invalid_acc\r\n", msgbufsize, 0) <= 0) {
+							cout << "[SERVER] : msg send error" << endl;
+							break;
+						}
+						else {
+							cout << "[SERVER] : send invalid_acc to CLIENT["
 							<< clientThreadAddr.sin_addr.s_addr
 							<< ":" << clientThreadAddr.sin_port
 							<< "]"<< endl;
 						}
 					}
 				}
-				else {
-					if (send(threadClientSocket, "general\r\n", msgbufsize, 0) <= 0) {
+			}
+			else if (tokenVector[0] == "id_list") {
+				//send accounts list to client
+				vector<string> accountTokenVector;
+
+				ifstream openFile(filePath.data());
+				if(openFile.is_open()) {
+					string accountData;
+					string accountDataID;
+					
+					//get account data from DB
+					while(getline(openFile, accountData, '$')) {
+						accountTokenVector.push_back(accountData);
+					}
+					openFile.close();
+					
+					for(int i = 0; i < accountTokenVector.size(); i++) {
+						istringstream accountID(accountTokenVector[i]);
+						getline(accountID, accountTokenVector[i], ',');
+					}
+					
+					//make send message
+					for(int i = 0; i < accountTokenVector.size(); i++) {
+						accountDataID += accountTokenVector[i];
+						accountDataID += "$";
+					}
+					accountDataID += "\r\n";
+					
+					
+					//server send message
+					if (send(threadClientSocket, accountDataID.c_str(), msgbufsize, 0) <= 0) {
 						cout << "[SERVER] : msg send error" << endl;
 						break;
 					}
 					else {
-						cout << "[SERVER] : send general to CLIENT["
-						<< clientThreadAddr.sin_addr.s_addr
-						<< ":" << clientThreadAddr.sin_port
-						<< "]"<< endl;
+						if(accountTokenVector.size() != 0) {
+							cout << "[SERVER] : send accounts info list to CLIENT["
+							<< clientThreadAddr.sin_addr.s_addr
+							<< ":" << clientThreadAddr.sin_port
+							<< "]\n[ACCOUNT LIST] : " << accountDataID;
+						}
+						else {
+							cout << "[SERVER] : send accounts info list to CLIENT["
+							<< clientThreadAddr.sin_addr.s_addr
+							<< ":" << clientThreadAddr.sin_port
+							<< "] : " << "empty list" << endl;
+						}
 					}
-					//DB search account function
-
-				}
-			}
-			else if (tokenVector[0] == "exit") {
-				//server send message
-				if (send(threadClientSocket, "exit\r\n", msgbufsize, 0) <= 0) {
-					cout << "[SERVER] : msg send error" << endl;
-					break;
-				}
-				else {
-					cout << "[SERVER] : send exit to CLIENT["
-					<< clientThreadAddr.sin_addr.s_addr
-					<< ":" << clientThreadAddr.sin_port
-					<< "]"<< endl;
-
-					cout << "[SERVER] : CLIENT[" << clientThreadAddr.sin_addr.s_addr
-					<< ":" << clientThreadAddr.sin_port << "] has exit from client thread" << endl;
-
-					pthread_exit((void*)&clientThread);
 				}
 			}
 			else if (tokenVector[0] == "admin") {
@@ -180,26 +231,16 @@ void* Server::clientThread(void* clientSock) {
 						<< clientThreadAddr.sin_addr.s_addr
 						<< ":" << clientThreadAddr.sin_port
 						<< "]"<< endl;
-						
-						string filePath = "/home/pi/testsrc/userAccount.txt";
-						
-						//add accounts info to file
+
+						//add accounts info to DB
 						ofstream writeFile(filePath.data(), ios::app);
 						if(writeFile.is_open()) {
-							writeFile << tokenVector[2] << "$" << tokenVector[3] << "$" << endl;
+							writeFile << tokenVector[2] << "," << tokenVector[3] << "$";
 							writeFile.close();
 						}
-						
-						//read accounts info from file
-						ifstream openFile(filePath.data());
-						if(openFile.is_open()) {
-							string accountData;
-							while(getline(openFile, accountData)) {
-								cout << accountData << endl;
-							}
-							openFile.close();
-						}
-						
+						cout << "[SERVER] : regist account success ["
+						<< tokenVector[2] << "," << tokenVector[3] << "]" << endl;
+
 						//openCV camera control function
 					}
 				}
@@ -215,7 +256,47 @@ void* Server::clientThread(void* clientSock) {
 						<< ":" << clientThreadAddr.sin_port
 						<< "]"<< endl;
 
-						//DB remove function
+						//search deregist accounts info from DB
+						vector<string> beforeAccountTokenVector;
+						vector<string> afterAccountTokenVector;
+						string accountData;
+						string accountDataID;
+						
+						ifstream openFile(filePath.data());
+						if(openFile.is_open()) {
+							while(getline(openFile, accountData, '$')) {
+								beforeAccountTokenVector.push_back(accountData);
+							}
+							openFile.close();
+					
+							for(int i = 0; i < beforeAccountTokenVector.size(); i++) {
+								istringstream accountID(beforeAccountTokenVector[i]);
+								getline(accountID, accountDataID, ',');
+								
+								if(accountDataID == tokenVector[2]) {
+									accountData = beforeAccountTokenVector[i];
+									
+									cout << "[SERVER] : deregist account success ["
+									<< accountData << "]" << endl;
+								}
+							}
+						}
+
+						//set new account array
+						for(int i = 0; i < beforeAccountTokenVector.size(); i++) {
+							if(beforeAccountTokenVector[i] != accountData) {
+								afterAccountTokenVector.push_back(beforeAccountTokenVector[i]);
+							}
+						}
+						
+						//refresh accounts info to DB
+						ofstream writeFile(filePath.data());
+						if(writeFile.is_open()) {
+							for(int i =0; i < afterAccountTokenVector.size(); i++) {
+								writeFile << afterAccountTokenVector[i] << "$";
+							}
+							writeFile.close();
+						}
 					}
 				}
 				else {
@@ -312,10 +393,9 @@ void Server::showError(const char* msg) {
 }
 
 //create server
-void Server::createServer(int PORT) {
-	Server server = Server(PORT);
-	server.bindSocket();
-	server.listenSocket();
+void Server::createServer() {
+	bindSocket();
+	listenSocket();
 	cout << "[SERVER] : create server success" << endl;
-	server.acceptSocket();
+	acceptSocket();
 }
