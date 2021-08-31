@@ -49,7 +49,6 @@ void Server::acceptSocket() {
 			cout << "[SERVER] : accept client error" << endl;
 		}
 		else {
-			//create server thread
 			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
 		}
 	}
