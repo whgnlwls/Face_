@@ -40,9 +40,9 @@ void Server::listenSocket() {
 void Server::acceptSocket() {
 	//create client thread
 	pthread_t cthread;
-	int clientAddrlen = sizeof(clientAddr);
 
 	while(1) {
+		clientAddrlen = sizeof(clientAddr);
 		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, (socklen_t*)&clientAddrlen);
 		
 		if(clientSocket < 0) {
@@ -62,7 +62,6 @@ void* Server::clientThread(void* clientSock) {
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
 	string accountfilePath = "/home/pi/testsrc/userAccount.txt";
-	string doorLockStatPath = "/home/pi/testsrc/doorLockStat.txt";
 
 	//set client socket typedef
 	sockaddr_in clientThreadAddr;
@@ -184,13 +183,13 @@ void* Server::clientThread(void* clientSock) {
 					}
 					openFile.close();
 					
-					for(int i = 0; i < accountTokenVector.size(); i++) {
+					for(unsigned int i = 0; i < accountTokenVector.size(); i++) {
 						istringstream accountID(accountTokenVector[i]);
 						getline(accountID, accountTokenVector[i], ',');
 					}
 					
 					//make send message
-					for(int i = 0; i < accountTokenVector.size(); i++) {
+					for(unsigned int i = 0; i < accountTokenVector.size(); i++) {
 						accountDataID += accountTokenVector[i];
 						accountDataID += "$";
 					}
@@ -268,7 +267,7 @@ void* Server::clientThread(void* clientSock) {
 							}
 							openFile.close();
 					
-							for(int i = 0; i < beforeAccountTokenVector.size(); i++) {
+							for(unsigned int i = 0; i < beforeAccountTokenVector.size(); i++) {
 								istringstream accountID(beforeAccountTokenVector[i]);
 								getline(accountID, accountDataID, ',');
 								
@@ -282,7 +281,7 @@ void* Server::clientThread(void* clientSock) {
 						}
 
 						//set new account array
-						for(int i = 0; i < beforeAccountTokenVector.size(); i++) {
+						for(unsigned int i = 0; i < beforeAccountTokenVector.size(); i++) {
 							if(beforeAccountTokenVector[i] != accountData) {
 								afterAccountTokenVector.push_back(beforeAccountTokenVector[i]);
 							}
@@ -291,7 +290,7 @@ void* Server::clientThread(void* clientSock) {
 						//refresh accounts info to DB
 						ofstream writeFile(accountfilePath.data());
 						if(writeFile.is_open()) {
-							for(int i =0; i < afterAccountTokenVector.size(); i++) {
+							for(unsigned int i =0; i < afterAccountTokenVector.size(); i++) {
 								writeFile << afterAccountTokenVector[i] << "$";
 							}
 							writeFile.close();
@@ -326,11 +325,7 @@ void* Server::clientThread(void* clientSock) {
 						<< "]"<< endl;
 						
 						//lock
-						ofstream writeFile(doorLockStatPath.data());
-						if(writeFile.is_open()) {
-							writeFile << "open";
-							writeFile.close();
-						}
+						
 					}
 				}
 				else if (tokenVector[1] == "close") {
@@ -346,11 +341,7 @@ void* Server::clientThread(void* clientSock) {
 						<< "]"<< endl;
 						
 						//unlock
-						ofstream writeFile(doorLockStatPath.data());
-						if(writeFile.is_open()) {
-							writeFile << "close";
-							writeFile.close();
-						}
+						
 					}
 				}
 				else if (tokenVector[1] == "logout") {

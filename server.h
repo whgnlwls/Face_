@@ -13,6 +13,7 @@ private:
 	
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in clientAddr;
+	int clientAddrlen;
 
 protected:
 	
@@ -32,7 +33,7 @@ public:
 	void acceptSocket();
 	
 	//thread
-	static void* clientThread(void* clientSock);
+	static void* clientThread(void* client);
 
 	//print error
 	void showError(const char* msg);
