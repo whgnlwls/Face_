@@ -49,15 +49,21 @@ void Server::acceptSocket() {
 			cout << "[SERVER] : accept client error" << endl;
 		}
 		else {
-			pthread_create(&cthread, NULL, clientThread, (void*)&clientSocket);
+			CLCR clientData;
+			clientData.CLCR_Socket = clientSocket;
+			clientData.CLCR_pClass = this;
+			
+			pthread_create(&cthread, NULL, clientThread, (void*)&clientData);
 		}
 	}
 }
 
 //client thread
-void* Server::clientThread(void* clientSock) {
+void* Server::clientThread(void* clientData) {
 	//thread init
-	int threadClientSocket = *(int*)clientSock;
+	CLCR client = *(CLCR*)clientData;
+	
+	int threadClientSocket = client.CLCR_Socket;
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
 	string accountfilePath = "/home/pi/testsrc/userAccount.txt";
@@ -239,6 +245,7 @@ void* Server::clientThread(void* clientSock) {
 						<< tokenVector[2] << "," << tokenVector[3] << "]" << endl;
 
 						//openCV camera control function
+						
 					}
 				}
 				else if (tokenVector[1] == "deregist") {
@@ -323,8 +330,8 @@ void* Server::clientThread(void* clientSock) {
 						<< ":" << clientThreadAddr.sin_port
 						<< "]"<< endl;
 						
-						//lock
-						
+						//unlock
+						client.CLCR_pClass->MTsetOpen();
 					}
 				}
 				else if (tokenVector[1] == "close") {
@@ -339,8 +346,8 @@ void* Server::clientThread(void* clientSock) {
 						<< ":" << clientThreadAddr.sin_port
 						<< "]"<< endl;
 						
-						//unlock
-						
+						//lock
+						client.CLCR_pClass->MTsetClose();
 					}
 				}
 				else if (tokenVector[1] == "logout") {

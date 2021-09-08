@@ -42,4 +42,10 @@ public:
 	void createServer();
 };
 
+//type define
+typedef struct ClientControl {
+	Server* CLCR_pClass;
+	int CLCR_Socket;
+}CLCR;
+
 #endif
