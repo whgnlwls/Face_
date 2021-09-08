@@ -67,6 +67,7 @@ void* Server::clientThread(void* clientData) {
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
 	string accountfilePath = "/home/pi/testsrc/userAccount.txt";
+	string openCV_ID = "/home/pi/testsrc/openCV_ID.txt";
 
 	//set client socket typedef
 	sockaddr_in clientThreadAddr;
@@ -234,8 +235,13 @@ void* Server::clientThread(void* clientData) {
 					cout << "[SERVER] : regist account success ["
 					<< tokenVector[2] << "," << tokenVector[3] << "]" << endl;
 					
-					//openCV camera control function
-						
+					//openCV camera control
+					ofstream IDsender(openCV_ID.data());
+					if(IDsender.is_open()) {
+						IDsender << tokenVector[2];
+						IDsender.close();
+					}
+					system("python /home/pi/testsrc/facede/1_2Modeling.py");
 				}
 			}
 			else if (tokenVector[1] == "deregist") {
@@ -273,6 +279,13 @@ void* Server::clientThread(void* clientData) {
 								<< accountData << "]" << endl;
 							}
 						}
+						
+						//remove picture
+						string removePic;
+						removePic += "rm -r /home/pi/testsrc/facede/dataset/User.";
+						removePic += tokenVector[2].c_str();
+						removePic +=".*";
+						system(removePic.c_str());
 					}
 
 					//set new account array
@@ -285,7 +298,7 @@ void* Server::clientThread(void* clientData) {
 					//refresh accounts info to DB
 					ofstream writeFile(accountfilePath.data());
 					if(writeFile.is_open()) {
-						for(unsigned int i =0; i < afterAccountTokenVector.size(); i++) {
+						for(unsigned int i = 0; i < afterAccountTokenVector.size(); i++) {
 							writeFile << afterAccountTokenVector[i] << "$";
 						}
 						writeFile.close();
