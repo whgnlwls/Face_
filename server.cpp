@@ -1,11 +1,19 @@
 #include "server.h"
 
 //create socket
-Server::Server(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int pinMotor, int PORT) : SensorControl(pinBuzzer, pinUltraSonicTrig, pinUltraSonicEcho, pinMotor) {
+Server::Server(int pinBuzzer, int F_pinUltraSonicTrig, int F_pinUltraSonicEcho, int B_pinUltraSonicTrig, int B_pinUltraSonicEcho, int pinMotor, int PORT)
+ : SensorControl(pinBuzzer, F_pinUltraSonicTrig, F_pinUltraSonicEcho, B_pinUltraSonicTrig, B_pinUltraSonicEcho, pinMotor) {
 	if((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 		showError("[SERVER] : create server socket error");
 	}
 	else {
+		accountfilePath = "/home/pi/testsrc/userAccount.txt";
+		openCV_ID = "/home/pi/testsrc/openCV_ID.txt";
+		openCV_Confidence = "/home/pi/testsrc/openCV_confidence.txt";
+		
+		pthread_t dthread;
+		pthread_create(&dthread, NULL, doorlockThread, (void*)this);
+		
 		//set server socket typedef
 		memset(&serverAddr, 0, sizeof(serverAddr));
 		serverAddr.sin_family = AF_INET;
@@ -20,6 +28,52 @@ Server::Server(int pinBuzzer, int pinUltraSonicTrig, int pinUltraSonicEcho, int 
 Server::~Server() {
 	close(clientSocket);
 	close(serverSocket);
+}
+
+//doorlock thread
+void* Server::doorlockThread(void* pClass) {
+	Server sClass = *(Server*)pClass;
+	
+	while(1) {
+		//ultra sonic sensor work
+		sClass.F_USgetDist();
+		delay(1);
+		sClass.B_USgetDist();
+		delay(10);
+		cout << endl;
+		
+		if(sClass.F_getDist() < F_US_STD_DIST) {
+			//openCV face detect
+			system("sudo python /home/pi/testsrc/facede/NewDetect.py");
+			
+			//get confidence
+			string confidence;
+			ifstream confidenceFile(sClass.openCV_Confidence.data());
+			if(confidenceFile.is_open()) {
+				getline(confidenceFile, confidence);
+				confidenceFile.close();
+			}
+			
+			//if face know door open
+			int count = 0;
+			if(stoi(confidence)) {
+				sClass.MTsetOpen();
+				do {
+					sClass.B_USgetDist();
+					delay(5);
+					count++;
+					if(count > 10) sClass.BZsetBuzzer();
+				} while(sClass.B_getDist() > B_US_STD_DIST);
+				delay(100);
+				sClass.MTsetClose();
+			}
+			else {
+				if(sClass.B_getDist() > B_US_STD_DIST) {
+					sClass.BZsetBuzzer();
+				}
+			}
+		}
+	}
 }
 
 //bind
@@ -66,8 +120,6 @@ void* Server::clientThread(void* clientData) {
 	int threadClientSocket = client.CLCR_Socket;
 	char msgbuf[BUFSIZE];
 	int msgbufsize = sizeof(msgbuf);
-	string accountfilePath = "/home/pi/testsrc/userAccount.txt";
-	string openCV_ID = "/home/pi/testsrc/openCV_ID.txt";
 
 	//set client socket typedef
 	sockaddr_in clientThreadAddr;
@@ -114,7 +166,7 @@ void* Server::clientThread(void* clientData) {
 				int ID_checked;
 				int PWD_checked;
 					
-				ifstream openFile(accountfilePath.data());
+				ifstream openFile(client.CLCR_pClass->accountfilePath.data());
 				if(openFile.is_open()) {
 					while(getline(openFile, accountData, '$')) {
 						ID_checked = 0;
@@ -171,7 +223,7 @@ void* Server::clientThread(void* clientData) {
 			//send accounts list to client
 			vector<string> accountTokenVector;
 
-			ifstream openFile(accountfilePath.data());
+			ifstream openFile(client.CLCR_pClass->accountfilePath.data());
 			if(openFile.is_open()) {
 				string accountData;
 				string accountDataID;
@@ -216,32 +268,64 @@ void* Server::clientThread(void* clientData) {
 		}
 		else if (tokenVector[0] == "admin") {
 			if (tokenVector[1] == "regist") {
-				//server send message
-				if(send(threadClientSocket, "regist\r\n", msgbufsize, 0) <= 0) {
-					cout << "[SERVER] : msg send error" << endl;
-				}
-				else {
-					cout << "[SERVER] : send regist to CLIENT["
-					<< clientThreadAddr.sin_addr.s_addr
-					<< ":" << clientThreadAddr.sin_port
-					<< "]"<< endl;
-
-					//add accounts info to DB
-					ofstream writeFile(accountfilePath.data(), ios::app);
-					if(writeFile.is_open()) {
-						writeFile << tokenVector[2] << "," << tokenVector[3] << "$";
-						writeFile.close();
-					}
-					cout << "[SERVER] : regist account success ["
-					<< tokenVector[2] << "," << tokenVector[3] << "]" << endl;
+				//is same ID on DB
+				vector<string> accountTokenVector;
+				string accountData;
+				string accountDataID;
+				int isSameID = 0;
 					
-					//openCV camera control
-					ofstream IDsender(openCV_ID.data());
-					if(IDsender.is_open()) {
-						IDsender << tokenVector[2];
-						IDsender.close();
+				ifstream openFile(client.CLCR_pClass->accountfilePath.data());
+				if(openFile.is_open()) {
+					while(getline(openFile, accountData, '$')) {
+						accountTokenVector.push_back(accountData);
 					}
-					system("python /home/pi/testsrc/facede/1_2Modeling.py");
+					openFile.close();
+				}
+				for(int i = 0; i < accountTokenVector.size(); i++) {
+					istringstream accountID(accountTokenVector[i]);
+					getline(accountID, accountDataID, ',');
+					if(accountDataID == tokenVector[2]) {
+						isSameID = 1;
+						if(send(threadClientSocket, "sameID\r\n", msgbufsize, 0) <= 0) {
+							cout << "[SERVER] : msg send error" << endl;
+						}
+						else {
+							cout << "[SERVER] : send sameID to CLIENT["
+							<< clientThreadAddr.sin_addr.s_addr
+							<< ":" << clientThreadAddr.sin_port
+							<< "]"<< endl;
+						}
+					}
+				}
+				
+				if(isSameID == 0) {
+					//server send message
+					if(send(threadClientSocket, "regist\r\n", msgbufsize, 0) <= 0) {
+						cout << "[SERVER] : msg send error" << endl;
+					}
+					else {
+						cout << "[SERVER] : send regist to CLIENT["
+						<< clientThreadAddr.sin_addr.s_addr
+						<< ":" << clientThreadAddr.sin_port
+						<< "]"<< endl;
+						
+						//add accounts info to DB
+						ofstream writeFile(client.CLCR_pClass->accountfilePath.data(), ios::app);
+						if(writeFile.is_open()) {
+							writeFile << tokenVector[2] << "," << tokenVector[3] << "$";
+							writeFile.close();
+						}
+						cout << "[SERVER] : regist account success ["
+						<< tokenVector[2] << "," << tokenVector[3] << "]" << endl;
+						
+						//openCV camera control
+						ofstream IDsender(client.CLCR_pClass->openCV_ID.data());
+						if(IDsender.is_open()) {
+							IDsender << tokenVector[2];
+							IDsender.close();
+						}
+						system("python /home/pi/testsrc/facede/NewModeling.py");
+					}
 				}
 			}
 			else if (tokenVector[1] == "deregist") {
@@ -261,7 +345,7 @@ void* Server::clientThread(void* clientData) {
 					string accountData;
 					string accountDataID;
 						
-					ifstream openFile(accountfilePath.data());
+					ifstream openFile(client.CLCR_pClass->accountfilePath.data());
 					if(openFile.is_open()) {
 						while(getline(openFile, accountData, '$')) {
 							beforeAccountTokenVector.push_back(accountData);
@@ -296,7 +380,7 @@ void* Server::clientThread(void* clientData) {
 					}
 						
 					//refresh accounts info to DB
-					ofstream writeFile(accountfilePath.data());
+					ofstream writeFile(client.CLCR_pClass->accountfilePath.data());
 					if(writeFile.is_open()) {
 						for(unsigned int i = 0; i < afterAccountTokenVector.size(); i++) {
 							writeFile << afterAccountTokenVector[i] << "$";
