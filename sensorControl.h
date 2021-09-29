@@ -15,7 +15,6 @@ private:
 	int B_pinUltraSonicTrig;
 	int B_pinUltraSonicEcho;
 	int pinMotor;
-	
 
 protected:
 	float F_Dist;

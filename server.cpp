@@ -44,7 +44,7 @@ void* Server::doorlockThread(void* pClass) {
 		
 		if(sClass.F_getDist() < F_US_STD_DIST) {
 			//openCV face detect
-			system("sudo python /home/pi/testsrc/facede/NewDetect.py");
+			system("sudo python /home/pi/testsrc/facede/3.py");
 			
 			//get confidence
 			string confidence;
@@ -324,7 +324,7 @@ void* Server::clientThread(void* clientData) {
 							IDsender << tokenVector[2];
 							IDsender.close();
 						}
-						system("python /home/pi/testsrc/facede/NewModeling.py");
+						system("python /home/pi/testsrc/facede/NewModeling.py && python /home/pi/testsrc/facede/2.py");
 					}
 				}
 			}
@@ -370,6 +370,7 @@ void* Server::clientThread(void* clientData) {
 						removePic += tokenVector[2].c_str();
 						removePic +=".*";
 						system(removePic.c_str());
+						system("python /home/pi/testsrc/facede/2.py");
 					}
 
 					//set new account array
