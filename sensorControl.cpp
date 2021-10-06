@@ -15,6 +15,12 @@ SensorControl::SensorControl(int pinBuzzer, int F_pinUltraSonicTrig, int F_pinUl
 	pinMode(SensorControl::B_pinUltraSonicTrig, OUTPUT);
 	pinMode(SensorControl::B_pinUltraSonicEcho, INPUT);
 	pinMode(SensorControl::pinMotor, OUTPUT);
+	
+	SensorControl::isCameraUse = 0;
+	SensorControl::isMotorUse = 0;
+	SensorControl::isBuzzerUse = 0;
+	SensorControl::isFUltraSonicUse = 0;
+	SensorControl::isBUltraSonicUse = 0;
 
 	printf("pinNum : buz %d, fulst %d, fulse %d, bulst %d, bulse %d, mot %d\n", pinBuzzer, F_pinUltraSonicTrig, F_pinUltraSonicEcho, B_pinUltraSonicTrig, B_pinUltraSonicEcho, pinMotor);
 }

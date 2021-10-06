@@ -19,6 +19,12 @@ private:
 protected:
 	float F_Dist;
 	float B_Dist;
+	
+	int isCameraUse;
+	int isMotorUse;
+	int isBuzzerUse;
+	int isFUltraSonicUse;
+	int isBUltraSonicUse;
 
 public:
 	//initialize

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <wiringPi.h>
 #include <softPwm.h>
-#include <stdio.h>
+#include <python3.7/Python.h>
 
 #include <fstream>
 #include <iostream>
@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
 #include <pthread.h>
 
 using namespace std;

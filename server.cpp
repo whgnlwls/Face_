@@ -7,11 +7,11 @@ Server::Server(int pinBuzzer, int F_pinUltraSonicTrig, int F_pinUltraSonicEcho, 
 		showError("[SERVER] : create server socket error");
 	}
 	else {
-		accountfilePath = "/home/pi/testsrc/userAccount.txt";
-		openCV_ID = "/home/pi/testsrc/openCV_ID.txt";
-		openCV_Confidence = "/home/pi/testsrc/openCV_confidence.txt";
+		this->pythonSwitch = 0;
 		
-		pthread_t dthread;
+		pthread_t dthread, pythread;
+		
+		pthread_create(&pythread, NULL, pythonProcessThread, (void*)this);
 		pthread_create(&dthread, NULL, doorlockThread, (void*)this);
 		
 		//set server socket typedef
@@ -26,54 +26,60 @@ Server::Server(int pinBuzzer, int F_pinUltraSonicTrig, int F_pinUltraSonicEcho, 
 
 //close socket
 Server::~Server() {
-	close(clientSocket);
-	close(serverSocket);
+	close(Server::clientSocket);
+	close(Server::serverSocket);
 }
 
 //doorlock thread
 void* Server::doorlockThread(void* pClass) {
-	Server sClass = *(Server*)pClass;
+	Server* sClass;
 	
-	while(1) {
-		//ultra sonic sensor work
-		sClass.F_USgetDist();
-		delay(1);
-		sClass.B_USgetDist();
-		delay(10);
-		cout << endl;
+	do {
+		sClass = (Server*)pClass;
 		
-		if(sClass.F_getDist() < F_US_STD_DIST) {
-			//openCV face detect
-			system("sudo python /home/pi/testsrc/facede/3.py");
+		//ultra sonic sensor work
+		if(sClass->isCameraUse != 1) {
+			sClass->F_USgetDist();
+			sClass->B_USgetDist();
+			delay(10);
+			cout << endl;
 			
-			//get confidence
-			string confidence;
-			ifstream confidenceFile(sClass.openCV_Confidence.data());
-			if(confidenceFile.is_open()) {
-				getline(confidenceFile, confidence);
-				confidenceFile.close();
-			}
-			
-			//if face know door open
-			int count = 0;
-			if(stoi(confidence)) {
-				sClass.MTsetOpen();
-				do {
-					sClass.B_USgetDist();
-					delay(5);
-					count++;
-					if(count > 10) sClass.BZsetBuzzer();
-				} while(sClass.B_getDist() > B_US_STD_DIST);
-				delay(100);
-				sClass.MTsetClose();
-			}
-			else {
-				if(sClass.B_getDist() > B_US_STD_DIST) {
-					sClass.BZsetBuzzer();
+			if(sClass->F_getDist() < F_US_STD_DIST && sClass->pythonSwitch == 0) {
+				//openCV face detect
+				sClass->pythonSwitch = 3;
+				while(!sClass->pythonSwitch == 0);
+				
+				//get confidence
+				string confidence;
+				ifstream confidenceFile(sClass->path_openCV_Confidence.data());
+				if(confidenceFile.is_open()) {
+					getline(confidenceFile, confidence);
+					confidenceFile.close();
+				}
+				
+				//if face know door open
+				int count = 0;
+				if(stoi(confidence)) {
+					sClass->MTsetOpen();
+					do {
+						sClass->B_USgetDist();
+						delay(5);
+						count++;
+						if(count > 10) sClass->BZsetBuzzer();
+					} while(sClass->B_getDist() > B_US_STD_DIST);
+					delay(100);
+					sClass->MTsetClose();
+				}
+				else {
+					if(sClass->B_getDist() > B_US_STD_DIST) {
+						sClass->BZsetBuzzer();
+					}
 				}
 			}
 		}
-	}
+	} while(1);
+	
+	return 0;
 }
 
 //bind
@@ -90,7 +96,7 @@ void Server::listenSocket() {
 	}
 }
 
-//accept
+//accept      last error : accept is zombie
 void Server::acceptSocket() {
 	//create client thread
 	pthread_t cthread;
@@ -166,7 +172,7 @@ void* Server::clientThread(void* clientData) {
 				int ID_checked;
 				int PWD_checked;
 					
-				ifstream openFile(client.CLCR_pClass->accountfilePath.data());
+				ifstream openFile(client.CLCR_pClass->path_account.data());
 				if(openFile.is_open()) {
 					while(getline(openFile, accountData, '$')) {
 						ID_checked = 0;
@@ -223,7 +229,7 @@ void* Server::clientThread(void* clientData) {
 			//send accounts list to client
 			vector<string> accountTokenVector;
 
-			ifstream openFile(client.CLCR_pClass->accountfilePath.data());
+			ifstream openFile(client.CLCR_pClass->path_account.data());
 			if(openFile.is_open()) {
 				string accountData;
 				string accountDataID;
@@ -274,14 +280,14 @@ void* Server::clientThread(void* clientData) {
 				string accountDataID;
 				int isSameID = 0;
 					
-				ifstream openFile(client.CLCR_pClass->accountfilePath.data());
+				ifstream openFile(client.CLCR_pClass->path_account.data());
 				if(openFile.is_open()) {
 					while(getline(openFile, accountData, '$')) {
 						accountTokenVector.push_back(accountData);
 					}
 					openFile.close();
 				}
-				for(int i = 0; i < accountTokenVector.size(); i++) {
+				for(unsigned int i = 0; i < accountTokenVector.size(); i++) {
 					istringstream accountID(accountTokenVector[i]);
 					getline(accountID, accountDataID, ',');
 					if(accountDataID == tokenVector[2]) {
@@ -310,7 +316,7 @@ void* Server::clientThread(void* clientData) {
 						<< "]"<< endl;
 						
 						//add accounts info to DB
-						ofstream writeFile(client.CLCR_pClass->accountfilePath.data(), ios::app);
+						ofstream writeFile(client.CLCR_pClass->path_account.data(), ios::app);
 						if(writeFile.is_open()) {
 							writeFile << tokenVector[2] << "," << tokenVector[3] << "$";
 							writeFile.close();
@@ -319,12 +325,22 @@ void* Server::clientThread(void* clientData) {
 						<< tokenVector[2] << "," << tokenVector[3] << "]" << endl;
 						
 						//openCV camera control
-						ofstream IDsender(client.CLCR_pClass->openCV_ID.data());
+						ofstream IDsender(client.CLCR_pClass->path_openCV_ID.data());
 						if(IDsender.is_open()) {
 							IDsender << tokenVector[2];
 							IDsender.close();
 						}
-						system("python /home/pi/testsrc/facede/NewModeling.py && python /home/pi/testsrc/facede/2.py");
+						
+						while(!client.CLCR_pClass->isCameraUse == 0);
+						client.CLCR_pClass->isCameraUse = 1;
+						
+						while(!client.CLCR_pClass->pythonSwitch == 0);
+						client.CLCR_pClass->pythonSwitch = 1;
+						
+						while(!client.CLCR_pClass->pythonSwitch == 0);
+						client.CLCR_pClass->pythonSwitch = 2;
+						
+						client.CLCR_pClass->isCameraUse = 0;
 					}
 				}
 			}
@@ -345,7 +361,7 @@ void* Server::clientThread(void* clientData) {
 					string accountData;
 					string accountDataID;
 						
-					ifstream openFile(client.CLCR_pClass->accountfilePath.data());
+					ifstream openFile(client.CLCR_pClass->path_account.data());
 					if(openFile.is_open()) {
 						while(getline(openFile, accountData, '$')) {
 							beforeAccountTokenVector.push_back(accountData);
@@ -370,7 +386,9 @@ void* Server::clientThread(void* clientData) {
 						removePic += tokenVector[2].c_str();
 						removePic +=".*";
 						system(removePic.c_str());
-						system("python /home/pi/testsrc/facede/2.py");
+						
+						while(!client.CLCR_pClass->pythonSwitch == 0);
+						client.CLCR_pClass->pythonSwitch = 2;
 					}
 
 					//set new account array
@@ -381,7 +399,7 @@ void* Server::clientThread(void* clientData) {
 					}
 						
 					//refresh accounts info to DB
-					ofstream writeFile(client.CLCR_pClass->accountfilePath.data());
+					ofstream writeFile(client.CLCR_pClass->path_account.data());
 					if(writeFile.is_open()) {
 						for(unsigned int i = 0; i < afterAccountTokenVector.size(); i++) {
 							writeFile << afterAccountTokenVector[i] << "$";
@@ -473,6 +491,47 @@ void* Server::clientThread(void* clientData) {
 		}
 	}
 
+	return 0;
+}
+
+void* Server::pythonProcessThread(void* pClass) {
+	Py_Initialize();
+	Server* sClass;
+	
+	do {
+		sClass = (Server*)pClass;
+		
+		if(sClass->pythonSwitch == 1) {
+			PyObject *obj = Py_BuildValue("s", sClass->path_openCV_imageCapture.c_str());
+			FILE *file = _Py_fopen_obj(obj, "r+");
+							
+			if(file != NULL) {
+				PyRun_SimpleFile(file, sClass->path_openCV_imageCapture.c_str());
+			}
+			sClass->pythonSwitch = 0;
+		}
+	else if(sClass->pythonSwitch == 2) {
+			PyObject *obj = Py_BuildValue("s", sClass->path_openCV_imageModeling.c_str());
+			FILE *file = _Py_fopen_obj(obj, "r+");
+							
+			if(file != NULL) {
+				PyRun_SimpleFile(file, sClass->path_openCV_imageModeling.c_str());
+			}
+			sClass->pythonSwitch = 0;
+		}
+	else if(sClass->pythonSwitch == 3) {
+			PyObject *obj = Py_BuildValue("s", sClass->path_openCV_imageDetect.c_str());
+			FILE *file = _Py_fopen_obj(obj, "r+");
+							
+			if(file != NULL) {
+				PyRun_SimpleFile(file, sClass->path_openCV_imageDetect.c_str());
+			}
+			sClass->pythonSwitch = 0;
+		}
+	} while(1);
+	
+	Py_Finalize();
+	
 	return 0;
 }
 
