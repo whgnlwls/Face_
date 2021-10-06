@@ -12,6 +12,6 @@ int main() {
 	
 	Server server(buz, fulst, fulse, bulst, bulse, mot, 9000);
 	printf("Finish\n");
-
+	
 	return 0;
 }
