@@ -71,9 +71,7 @@ void* Server::doorlockThread(void* pClass) {
 					sClass->MTsetClose();
 				}
 				else {
-					if(sClass->B_getDist() > B_US_STD_DIST) {
-						sClass->BZsetBuzzer();
-					}
+					sClass->BZsetBuzzer();
 				}
 			}
 		}

@@ -47,7 +47,7 @@ void SensorControl::F_USgetDist() {
 
 	for (int i = 0; i < 5; i++) {
 		digitalWrite(F_pinUltraSonicTrig, LOW);
-		delay(200);
+		delay(100);
 
 		//throw
 		digitalWrite(F_pinUltraSonicTrig, HIGH);
@@ -72,7 +72,7 @@ void SensorControl::B_USgetDist() {
 
 	for (int i = 0; i < 5; i++) {
 		digitalWrite(B_pinUltraSonicTrig, LOW);
-		delay(200);
+		delay(100);
 
 		//throw
 		digitalWrite(B_pinUltraSonicTrig, HIGH);
