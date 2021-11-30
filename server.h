@@ -14,6 +14,14 @@ private:
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in clientAddr;
 	int clientAddrlen;
+	int isWindow;
+	
+	//Image path
+	string path_image_wait = "/home/pi/testsrc/wait.png";
+	string path_image_fail = "/home/pi/testsrc/fail.png";
+	
+	//Image Mat
+	Mat screen;
 	
 	//Value path
 	string path_account = "/home/pi/testsrc/userAccount.txt";;

@@ -6,6 +6,7 @@
 #include <wiringPi.h>
 #include <softPwm.h>
 #include <python3.7/Python.h>
+#include <opencv2/opencv.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -20,5 +21,6 @@
 #include <pthread.h>
 
 using namespace std;
+using namespace cv;
 
 #endif

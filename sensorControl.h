@@ -3,8 +3,8 @@
 
 #include "DoorLockHead.h"
 
-#define F_US_STD_DIST 10
-#define B_US_STD_DIST 10
+#define F_US_STD_DIST 30
+#define B_US_STD_DIST 5
 
 //class
 class SensorControl {

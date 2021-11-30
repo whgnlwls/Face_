@@ -8,6 +8,8 @@ Server::Server(int pinBuzzer, int F_pinUltraSonicTrig, int F_pinUltraSonicEcho, 
 	}
 	else {
 		this->pythonSwitch = 0;
+		this->isWindow = 0;
+		this->screen = imread(this->path_image_wait);
 		
 		pthread_t dthread, pythread;
 		
@@ -65,12 +67,21 @@ void* Server::doorlockThread(void* pClass) {
 						sClass->B_USgetDist();
 						delay(5);
 						count++;
-						if(count > 10) sClass->BZsetBuzzer();
+						if(count > 20) sClass->BZsetBuzzer();
 					} while(sClass->B_getDist() > B_US_STD_DIST);
 					delay(100);
 					sClass->MTsetClose();
+					
+					//set 0 confidence
+					ofstream writeFile(sClass->path_openCV_Confidence.data());
+					if(writeFile.is_open()) {
+						writeFile << 0;
+						
+						writeFile.close();
+					}
 				}
 				else {
+					sClass->pythonSwitch = 4;
 					sClass->BZsetBuzzer();
 				}
 			}
@@ -499,7 +510,36 @@ void* Server::pythonProcessThread(void* pClass) {
 	do {
 		sClass = (Server*)pClass;
 		
-		if(sClass->pythonSwitch == 1) {
+		if((sClass->pythonSwitch == 0 && sClass->isWindow == 0) || sClass->pythonSwitch == 4) {
+			if(sClass->pythonSwitch == 4) {
+				destroyWindow("wait");
+				sClass->isWindow = 0;
+				
+				sClass->screen = imread(sClass->path_image_fail);
+				namedWindow("fail");
+				imshow("fail", sClass->screen);
+				setWindowProperty("fail",WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
+				moveWindow("fail", 0, 0);
+				sClass->isWindow = 1;
+				waitKey(5000);
+				
+				destroyWindow("fail");
+				sClass->pythonSwitch = 0;
+				sClass->isWindow = 0;
+				sClass->screen = imread(sClass->path_image_wait);
+			}
+			else if(sClass->pythonSwitch == 0) {
+				namedWindow("wait");
+				imshow("wait", sClass->screen);
+				setWindowProperty("wait",WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
+				moveWindow("wait", 0, 0);
+				sClass->isWindow = 1;
+				waitKey(1000);
+			}	
+		}
+		else if(sClass->pythonSwitch == 1) {
+			destroyWindow("wait");
+			sClass->isWindow = 0;
 			PyObject *obj = Py_BuildValue("s", sClass->path_openCV_imageCapture.c_str());
 			FILE *file = _Py_fopen_obj(obj, "r+");
 							
@@ -508,7 +548,7 @@ void* Server::pythonProcessThread(void* pClass) {
 			}
 			sClass->pythonSwitch = 0;
 		}
-	else if(sClass->pythonSwitch == 2) {
+		else if(sClass->pythonSwitch == 2) {
 			PyObject *obj = Py_BuildValue("s", sClass->path_openCV_imageModeling.c_str());
 			FILE *file = _Py_fopen_obj(obj, "r+");
 							
@@ -517,7 +557,9 @@ void* Server::pythonProcessThread(void* pClass) {
 			}
 			sClass->pythonSwitch = 0;
 		}
-	else if(sClass->pythonSwitch == 3) {
+		else if(sClass->pythonSwitch == 3) {
+			destroyWindow("wait");
+			sClass->isWindow = 0;
 			PyObject *obj = Py_BuildValue("s", sClass->path_openCV_imageDetect.c_str());
 			FILE *file = _Py_fopen_obj(obj, "r+");
 							

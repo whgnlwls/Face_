@@ -9,9 +9,7 @@
 
 int main() {
 	if (wiringPiSetup() == -1) return -1;
-	
 	Server server(buz, fulst, fulse, bulst, bulse, mot, 9000);
-	printf("Finish\n");
 	
 	return 0;
 }
